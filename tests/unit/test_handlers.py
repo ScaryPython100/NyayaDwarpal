@@ -146,3 +146,24 @@ class TestTranscribe:
         assert response["statusCode"] == 503
         assert body["errorCode"] == "service_unavailable"
         assert "invalid_api_key" not in body["error"]
+
+
+class TestTranslationChunks:
+    @pytest.fixture(scope="class")
+    def translator(self):
+        return load_handler("document_translator")
+
+    @pytest.mark.parametrize("text", [
+        "word " * 2000,                                   # one long line, no punctuation
+        "यह एक वाक्य है। " * 300,                           # Hindi sentences on one line
+        "Line one.\n" * 400,                               # many short lines
+        "x" * 2500,                                        # no spaces at all
+    ])
+    def test_chunks_stay_under_sarvam_limit_and_keep_all_text(self, translator, text):
+        chunks = translator.split_into_chunks(text, 900)
+        assert chunks and all(len(c) <= 900 for c in chunks)
+        assert "".join(chunks).replace(" ", "").replace("\n", "") == text.replace(" ", "").replace("\n", "")
+
+    def test_bad_json_body_is_a_400(self, translator):
+        response = translator.lambda_handler({"body": "{not json"}, None)
+        assert response["statusCode"] == 400

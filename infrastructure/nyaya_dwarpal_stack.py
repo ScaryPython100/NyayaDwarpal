@@ -245,8 +245,8 @@ class NyayaDwarpalStack(Stack):
                 data_trace_enabled=False,
                 tracing_enabled=True,
                 # Caps cost if someone floods the public API
-                throttling_rate_limit=3,
-                throttling_burst_limit=6,
+                throttling_rate_limit=10,
+                throttling_burst_limit=20,
             ),
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
@@ -304,6 +304,7 @@ class NyayaDwarpalStack(Stack):
             self,
             "VoiceTriageLambda",
             function_name="NyayaDwarpal-VoiceTriage",
+            reserved_concurrent_executions=5,  # cost ceiling for paid AI calls
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler="handler.lambda_handler",
             code=lambda_.Code.from_asset("lambda_functions/voice_triage"),
@@ -325,6 +326,7 @@ class NyayaDwarpalStack(Stack):
             self,
             "DocumentTranslationLambda",
             function_name="NyayaDwarpal-DocumentTranslation",
+            reserved_concurrent_executions=5,  # cost ceiling for paid AI calls
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler="handler.lambda_handler",
             code=lambda_.Code.from_asset("lambda_functions/document_translator"),
@@ -347,6 +349,7 @@ class NyayaDwarpalStack(Stack):
             self,
             "PetitionArchitectLambda",
             function_name="NyayaDwarpal-PetitionArchitect",
+            reserved_concurrent_executions=3,  # cost ceiling for paid AI calls
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler="handler.lambda_handler",
             code=lambda_.Code.from_asset("lambda_functions/petition_architect"),
@@ -396,6 +399,7 @@ class NyayaDwarpalStack(Stack):
             self,
             "AudioTranscribeLambda",
             function_name="NyayaDwarpal-AudioTranscribe",
+            reserved_concurrent_executions=5,  # cost ceiling for paid AI calls
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler="handler.lambda_handler",
             code=lambda_.Code.from_asset("lambda_functions/audio_transcribe"),
@@ -414,6 +418,7 @@ class NyayaDwarpalStack(Stack):
             self,
             "DocumentVerifierLambda",
             function_name="NyayaDwarpal-DocumentVerifier",
+            reserved_concurrent_executions=3,  # cost ceiling for paid AI calls
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler="handler.lambda_handler",
             code=lambda_.Code.from_asset("lambda_functions/document_verifier"),
@@ -449,6 +454,17 @@ class NyayaDwarpalStack(Stack):
         # POST /petition/clarify
         petition_clarify = self.petition_resource.add_resource("clarify")
         petition_clarify.add_method("POST", petition_integration)
+
+        # Let browsers read throttling and gateway errors (otherwise they look like network failures)
+        for response_type in (apigateway.ResponseType.DEFAULT_4_XX, apigateway.ResponseType.DEFAULT_5_XX):
+            self.api.add_gateway_response(
+                f"GatewayResponse{response_type.response_type}",
+                type=response_type,
+                response_headers={
+                    "Access-Control-Allow-Origin": "'*'",
+                    "Access-Control-Allow-Headers": "'Content-Type'",
+                },
+            )
 
         petition_draft = self.petition_resource.add_resource("draft")
         petition_draft.add_method("POST", petition_integration)

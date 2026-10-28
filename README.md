@@ -69,7 +69,7 @@ The stack is deployed to **ap-south-2 (Hyderabad)** by default. Bedrock is calle
 - **Backend:** six Python 3.11 AWS Lambda functions behind API Gateway, sharing a Lambda layer (`lambda_functions/shared`) for the Bedrock client, AWS helpers and Pydantic models.
 - **AI:** Amazon Bedrock with `amazon.nova-lite-v1:0` for reasoning, and Sarvam AI for Indic speech-to-text and translation.
 - **Data:** DynamoDB, S3 (encrypted buckets) and Textract.
-- **Safety:** all AI and user text is HTML-escaped before display; the API is rate-limited (3 requests/s, burst 6) to cap AI costs; request bodies are never logged; cases can only be read by the ID that created them.
+- **Safety:** all AI and user text is HTML-escaped before display; the API is rate-limited (10 requests/s, burst 20) and each AI-calling Lambda has a concurrency cap (3–5) so costs stay bounded; request bodies are never logged; cases can only be read by the ID that created them.
 - **Infrastructure as code:** AWS CDK v2 (Python), in `infrastructure/nyaya_dwarpal_stack.py`.
 
 ## Run it yourself

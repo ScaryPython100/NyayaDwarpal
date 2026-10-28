@@ -33,6 +33,10 @@ lambda_functions/document_verifier/*/
 lambda_functions/document_verifier/*.py
 !lambda_functions/document_verifier/__init__.py
 !lambda_functions/document_verifier/handler.py
+lambda_functions/document_translator/*/
+lambda_functions/document_translator/*.py
+!lambda_functions/document_translator/__init__.py
+!lambda_functions/document_translator/handler.py
 
 # Build bundles, backups and logs
 *.zip

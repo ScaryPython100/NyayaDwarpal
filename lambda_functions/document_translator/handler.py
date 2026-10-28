@@ -6,6 +6,7 @@ translates to English using Sarvam AI, and applies legal glossary mappings.
 """
 
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor
 import os
 import uuid
@@ -34,6 +35,38 @@ dynamodb_helper = DynamoDBHelper()
 
 
 MAX_TRANSLATE_CHARS = 6000
+MAX_CHUNK_SIZE = 900  # mayura:v1 limit is 1000 characters
+
+SENTENCE_END = re.compile(r'(?<=[.!?।॥])\s+')
+
+
+def split_into_chunks(text: str, limit: int = MAX_CHUNK_SIZE) -> List[str]:
+    """Split text into pieces under `limit`, at line breaks, then sentence ends, then spaces"""
+    pieces = []
+    for line in text.split('\n'):
+        if len(line) <= limit:
+            pieces.append(line)
+            continue
+        for sentence in SENTENCE_END.split(line):
+            while len(sentence) > limit:
+                cut = sentence.rfind(' ', 0, limit)
+                cut = cut if cut > limit // 2 else limit
+                pieces.append(sentence[:cut])
+                sentence = sentence[cut:].lstrip()
+            pieces.append(sentence)
+
+    chunks, current = [], ''
+    for piece in pieces:
+        candidate = f"{current}\n{piece}" if current else piece
+        if len(candidate) <= limit:
+            current = candidate
+        else:
+            if current.strip():
+                chunks.append(current.strip())
+            current = piece
+    if current.strip():
+        chunks.append(current.strip())
+    return chunks
 
 TRANSLATION_ERRORS = {
     'service_unavailable': (503, 'Translation is not available right now. Please try again later.'),
@@ -62,68 +95,45 @@ def extract_text_from_document(s3_key: str = None, bucket: str = None, file_cont
     Returns:
         Extracted text content
     """
-    # If file content is provided directly (base64), decode and process
     if file_content:
         import base64
         print(f"Processing file content directly: {filename}")
-        
-        # Decode base64 content
         file_bytes = base64.b64decode(file_content)
-        
-        # Determine file type from filename
         ext = os.path.splitext(filename)[1].lower() if filename else '.txt'
-        
-        if ext == '.txt':
-            # Decode text directly
-            return file_bytes.decode('utf-8')
-        else:
-            # For PDFs, we need to upload to S3 temporarily for Textract
-            # (Textract requires S3 location)
-            temp_key = f"temp/{uuid.uuid4()}{ext}"
-            s3_helper.upload_file(
-                file_content=file_bytes,
-                bucket=bucket or DOCUMENT_BUCKET,
-                key=temp_key,
-                content_type='application/pdf' if ext == '.pdf' else 'image/jpeg'
-            )
-            
-            # Use Textract
-            textract_helper = TextractHelper(region='ap-south-1')
-            textract_response = textract_helper.analyze_document(
-                bucket=bucket or DOCUMENT_BUCKET,
-                key=temp_key,
-                feature_types=['FORMS', 'TABLES']
-            )
-            
-            # Clean up temp file
-            try:
-                s3_client = boto3.client('s3', region_name='ap-south-2')
-                s3_client.delete_object(Bucket=bucket or DOCUMENT_BUCKET, Key=temp_key)
-            except:
-                pass
-            
-            return textract_helper.extract_text(textract_response)
-    
-    # Otherwise, read from S3
-    ext = os.path.splitext(s3_key)[1].lower()
-    
-    if ext == '.txt':
-        # Read text files directly from S3 (no Textract needed)
-        print(f"Reading .txt file directly from S3 in ap-south-2")
-        s3_client = boto3.client('s3', region_name='ap-south-2')
-        response = s3_client.get_object(Bucket=bucket, Key=s3_key)
-        return response['Body'].read().decode('utf-8')
     else:
-        # Use Textract for PDFs and images (cross-region to ap-south-1)
-        print(f"Using Textract in ap-south-1 for {ext} file")
-        textract_helper = TextractHelper(region='ap-south-1')
-        textract_response = textract_helper.analyze_document(
-            bucket=bucket,
-            key=s3_key,
-            feature_types=['FORMS', 'TABLES']
-        )
-        return textract_helper.extract_text(textract_response)
+        ext = os.path.splitext(s3_key)[1].lower()
+        s3_client = boto3.client('s3', region_name='ap-south-2')
+        file_bytes = s3_client.get_object(Bucket=bucket, Key=s3_key)['Body'].read()
 
+    if ext == '.txt':
+        try:
+            return file_bytes.decode('utf-8')
+        except UnicodeDecodeError:
+            return file_bytes.decode('utf-16') if file_bytes[:2] in (b'\xff\xfe', b'\xfe\xff') else file_bytes.decode('latin-1')
+    if ext == '.pdf':
+        return extract_pdf_text(file_bytes)
+    raise TranslationError('no_text')
+
+
+def extract_pdf_text(pdf_bytes: bytes) -> str:
+    """Text layer first; Textract OCR (sent as bytes: it cannot read S3 in another region) for scanned pages"""
+    from io import BytesIO
+    import PyPDF2
+
+    try:
+        reader = PyPDF2.PdfReader(BytesIO(pdf_bytes))
+        text = '\n'.join(page.extract_text() or '' for page in reader.pages)
+        pages = len(reader.pages)
+    except Exception as e:
+        print(f"PDF text extraction failed: {str(e)}")
+        text, pages = '', 1
+    if len(text.strip()) >= 20:
+        return text
+    if pages > 1:
+        raise TranslationError('no_text')
+    textract = boto3.client('textract', region_name='ap-south-1')
+    response = textract.detect_document_text(Document={'Bytes': pdf_bytes})
+    return '\n'.join(block['Text'] for block in response.get('Blocks', []) if block.get('BlockType') == 'LINE')
 
 CORS_HEADERS = {
     'Content-Type': 'application/json',
@@ -146,7 +156,14 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     try:
         # Parse request
-        body = json.loads(event.get('body', '{}'))
+        try:
+            body = json.loads(event.get('body') or '{}')
+        except json.JSONDecodeError:
+            return {
+                'statusCode': 400,
+                'headers': CORS_HEADERS,
+                'body': json.dumps({'success': False, 'error': 'Invalid request'})
+            }
         user_id = body.get('userId')
         session_id = body.get('sessionId')
         document_id = body.get('documentId', str(uuid.uuid4()))
@@ -444,27 +461,8 @@ def translate_text(
             'Content-Type': 'application/json'
         }
         
-        # Chunk text if it exceeds 1000 characters (mayura:v1 limit)
-        MAX_CHUNK_SIZE = 900  # Leave some buffer
-        chunks = []
-        
-        if len(modified_text) <= MAX_CHUNK_SIZE:
-            chunks = [modified_text]
-        else:
-            # Split by sentences to avoid breaking mid-sentence
-            sentences = modified_text.replace('\n\n', '\n').split('\n')
-            current_chunk = ""
-            
-            for sentence in sentences:
-                if len(current_chunk) + len(sentence) + 1 <= MAX_CHUNK_SIZE:
-                    current_chunk += sentence + "\n"
-                else:
-                    if current_chunk:
-                        chunks.append(current_chunk.strip())
-                    current_chunk = sentence + "\n"
-            
-            if current_chunk:
-                chunks.append(current_chunk.strip())
+        # mayura:v1 accepts at most 1000 characters per request
+        chunks = split_into_chunks(modified_text, MAX_CHUNK_SIZE)
         
         print(f"Translating {len(chunks)} chunk(s) from {source_lang_code} -> {target_lang_code}")
         
@@ -492,7 +490,7 @@ def translate_text(
             raise TranslationError('translation_failed')
 
         # Translate chunks in parallel so long documents finish within the API time limit
-        with ThreadPoolExecutor(max_workers=4) as pool:
+        with ThreadPoolExecutor(max_workers=3) as pool:
             translated_chunks = list(pool.map(translate_chunk, chunks))
         
         # Combine translated chunks
