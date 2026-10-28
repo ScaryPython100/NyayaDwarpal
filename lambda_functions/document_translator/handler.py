@@ -6,6 +6,7 @@ translates to English using Sarvam AI, and applies legal glossary mappings.
 """
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 import os
 import uuid
 from datetime import datetime
@@ -30,6 +31,22 @@ SARVAM_AI_API_KEY = os.environ.get('SARVAM_AI_API_KEY', '')
 # Initialize clients
 s3_helper = S3Helper()
 dynamodb_helper = DynamoDBHelper()
+
+
+MAX_TRANSLATE_CHARS = 6000
+
+TRANSLATION_ERRORS = {
+    'service_unavailable': (503, 'Translation is not available right now. Please try again later.'),
+    'busy': (503, 'Too many people are translating right now. Please try again in a minute.'),
+    'translation_failed': (502, 'We could not translate this document. Please try again.'),
+    'no_text': (400, 'We could not find any text in this file. Try a clearer PDF or a .txt file.'),
+}
+
+
+class TranslationError(Exception):
+    def __init__(self, code: str):
+        super().__init__(code)
+        self.code = code
 
 
 def extract_text_from_document(s3_key: str = None, bucket: str = None, file_content: str = None, filename: str = None) -> str:
@@ -108,6 +125,14 @@ def extract_text_from_document(s3_key: str = None, bucket: str = None, file_cont
         return textract_helper.extract_text(textract_response)
 
 
+CORS_HEADERS = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+}
+
+
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     Main Lambda handler for document translation
@@ -125,8 +150,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         user_id = body.get('userId')
         session_id = body.get('sessionId')
         document_id = body.get('documentId', str(uuid.uuid4()))
-        source_language = body.get('sourceLanguage', 'hi')
-        target_language = body.get('targetLanguage', 'en')
+        source_language = body.get('sourceLanguage') or 'auto'
+        target_language = body.get('targetLanguage') or 'en'
         document_type = body.get('documentType', 'Other')
         s3_key = body.get('s3Key')
         file_content = body.get('fileContent')  # Base64 encoded file
@@ -177,20 +202,12 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 bucket=DOCUMENT_BUCKET
             )
         
-        if not original_text:
-            return {
-                'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key',
-                    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
-                },
-                'body': json.dumps(APIResponse.error_response(
-                    message="Text extraction failed",
-                    error="Unable to extract text from document"
-                ).dict())
-            }
+        if not original_text or not original_text.strip():
+            raise TranslationError('no_text')
+        original_text = original_text.strip()
+        truncated = len(original_text) > MAX_TRANSLATE_CHARS
+        if truncated:
+            original_text = original_text[:MAX_TRANSLATE_CHARS]
         
         # Step 2: Identify legal terms in the text
         print(f"Identifying legal terms in {source_language}")
@@ -208,21 +225,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             target_language=target_language,
             glossary_mappings=glossary_mappings
         )
-        
-        if not translated_text:
-            return {
-                'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key',
-                    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
-                },
-                'body': json.dumps(APIResponse.error_response(
-                    message="Translation failed",
-                    error="Unable to translate document"
-                ).dict())
-            }
         
         # Step 5: Identify unmapped terms that need review
         unmapped_terms = [
@@ -243,8 +245,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         response_data = {
             'sessionId': session_id,
             'documentId': document_id,
-            'originalText': original_text[:500] + '...' if len(original_text) > 500 else original_text,
-            'translatedText': translated_text[:500] + '...' if len(translated_text) > 500 else translated_text,
+            'originalText': original_text,
+            'translatedText': translated_text,
+            'truncated': truncated,
+            'sourceLanguage': source_language,
+            'targetLanguage': target_language,
             'glossaryMappings': glossary_mappings,
             'unmappedTerms': [
                 {
@@ -277,6 +282,20 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             ).dict())
         }
         
+    except TranslationError as e:
+        status, message = TRANSLATION_ERRORS.get(e.code, TRANSLATION_ERRORS['translation_failed'])
+        return {
+            'statusCode': status,
+            'headers': CORS_HEADERS,
+            'body': json.dumps({
+                'success': False,
+                'message': 'Translation failed',
+                'data': None,
+                'errorCode': e.code,
+                'error': message,
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        }
     except Exception as e:
         print(f"Error in document translation: {str(e)}")
         import traceback
@@ -291,7 +310,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
             'body': json.dumps(APIResponse.error_response(
                 message="Internal server error",
-                error=str(e)
+                error="Something went wrong while translating. Please try again."
             ).dict())
         }
 
@@ -317,7 +336,10 @@ def identify_legal_terms(text: str, language: str) -> List[str]:
         'ml': ['ഖാത', 'പഞ്ചനാമ', 'വാദി', 'പ്രതിവാദി'],
     }
     
-    terms = common_legal_terms.get(language, [])
+    if language in common_legal_terms:
+        terms = common_legal_terms[language]
+    else:
+        terms = [term for language_terms in common_legal_terms.values() for term in language_terms]
     identified = []
     
     for term in terms:
@@ -381,12 +403,15 @@ def translate_text(
     """
     import requests
     
+    if not SARVAM_AI_API_KEY:
+        raise TranslationError('service_unavailable')
+
     try:
-        # First, replace legal terms with placeholders
+        # First, replace legal terms with placeholders (glossary holds English equivalents)
         placeholder_map = {}
         modified_text = text
         
-        for i, mapping in enumerate(glossary_mappings):
+        for i, mapping in enumerate(glossary_mappings if target_language == 'en' else []):
             placeholder = f"__LEGAL_TERM_{i}__"
             modified_text = modified_text.replace(
                 mapping['originalTerm'],
@@ -409,7 +434,9 @@ def translate_text(
         }
         
         source_lang_code = language_map.get(source_language, 'auto')
-        target_lang_code = language_map.get(target_language, 'hi-IN')
+        target_lang_code = language_map.get(target_language, 'en-IN')
+        if source_lang_code == target_lang_code:
+            source_lang_code = 'auto'
         
         # Prepare headers for Sarvam AI
         headers = {
@@ -441,11 +468,7 @@ def translate_text(
         
         print(f"Translating {len(chunks)} chunk(s) from {source_lang_code} -> {target_lang_code}")
         
-        # Translate each chunk
-        translated_chunks = []
-        for i, chunk in enumerate(chunks):
-            print(f"Translating chunk {i+1}/{len(chunks)} ({len(chunk)} chars)")
-            
+        def translate_chunk(chunk: str) -> str:
             payload = {
                 'input': chunk,
                 'source_language_code': source_lang_code,
@@ -453,20 +476,24 @@ def translate_text(
                 'model': 'mayura:v1',
                 'mode': 'formal'
             }
-            
             response = requests.post(
                 f'{SARVAM_AI_ENDPOINT}/translate',
                 headers=headers,
                 json=payload,
-                timeout=30
+                timeout=20
             )
-            
             if response.status_code == 200:
-                result = response.json()
-                translated_chunks.append(result.get('translated_text', ''))
-            else:
-                print(f"Sarvam AI translation error for chunk {i+1}: {response.status_code} - {response.text}")
-                return None
+                return response.json().get('translated_text', '')
+            print(f"Sarvam AI translation error: {response.status_code} - {response.text[:300]}")
+            if response.status_code in (401, 403):
+                raise TranslationError('service_unavailable')
+            if response.status_code == 429:
+                raise TranslationError('busy')
+            raise TranslationError('translation_failed')
+
+        # Translate chunks in parallel so long documents finish within the API time limit
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            translated_chunks = list(pool.map(translate_chunk, chunks))
         
         # Combine translated chunks
         translated = '\n'.join(translated_chunks)
@@ -477,6 +504,8 @@ def translate_text(
         
         return translated
             
+    except TranslationError:
+        raise
     except Exception as e:
         print(f"Error in translation: {str(e)}")
-        return None
+        raise TranslationError('translation_failed')

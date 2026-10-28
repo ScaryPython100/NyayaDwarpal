@@ -135,6 +135,19 @@ class NyayaDwarpalStack(Stack):
             removal_policy=RemovalPolicy.RETAIN,
             time_to_live_attribute="ttl",
         )
+
+        # Lets Case History fetch one user's cases, newest first
+        self.session_table.add_global_secondary_index(
+            index_name="UserIdIndex",
+            partition_key=dynamodb.Attribute(
+                name="userId",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="timestamp",
+                type=dynamodb.AttributeType.STRING
+            ),
+        )
         
         # Legal glossary table
         self.glossary_table = dynamodb.Table(
@@ -227,9 +240,13 @@ class NyayaDwarpalStack(Stack):
             description="REST API for Nyaya-Dwarpal AI Agent",
             deploy_options=apigateway.StageOptions(
                 stage_name="prod",
-                logging_level=apigateway.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
+                logging_level=apigateway.MethodLoggingLevel.ERROR,
+                # Request bodies hold people's legal problems and audio: never log them
+                data_trace_enabled=False,
                 tracing_enabled=True,
+                # Caps cost if someone floods the public API
+                throttling_rate_limit=3,
+                throttling_burst_limit=6,
             ),
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
@@ -432,6 +449,9 @@ class NyayaDwarpalStack(Stack):
         # POST /petition/clarify
         petition_clarify = self.petition_resource.add_resource("clarify")
         petition_clarify.add_method("POST", petition_integration)
+
+        petition_draft = self.petition_resource.add_resource("draft")
+        petition_draft.add_method("POST", petition_integration)
         
         # Case Memory endpoint: GET /cases
         cases_resource = self.api.root.add_resource("cases")

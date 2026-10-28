@@ -1,5 +1,11 @@
 {
   "dependencies": {
     "aws-cdk": "^2.1108.0"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -c ui/tailwind.config.js -i ui/src/input.css -o ui/styles.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
   }
 }

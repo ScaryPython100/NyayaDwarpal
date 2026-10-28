@@ -27,6 +27,7 @@ lambda_functions/shared/python/*
 !lambda_functions/shared/python/aws_helpers.py
 !lambda_functions/shared/python/bedrock_client.py
 !lambda_functions/shared/python/models.py
+!lambda_functions/shared/python/law_map.py
 lambda_functions/audio_transcribe/python/
 lambda_functions/document_verifier/*/
 lambda_functions/document_verifier/*.py

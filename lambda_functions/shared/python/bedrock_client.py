@@ -8,6 +8,8 @@ import boto3
 from typing import Dict, Any, Optional
 from botocore.exceptions import ClientError
 
+from law_map import reference_table
+
 
 class BedrockClient:
     MODEL_ID = "amazon.nova-lite-v1:0"
@@ -136,10 +138,10 @@ class BedrockClient:
             language_instruction = "Respond in clear, professional English.\nJSON keys must be in English. All content values must be in English."
             language_reminder = ""
         elif use_native_script:
-            language_instruction = f"YOU MUST RESPOND ONLY IN {language_name.upper()} USING {script_name.upper()}.\nFor {language_name}: Use ONLY {script_name}.\nABSOLUTELY NO English or Roman letters in your response content. JSON keys must stay in English but ALL values must be in {script_name}."
+            language_instruction = f"YOU MUST RESPOND ONLY IN {language_name.upper()} USING {script_name.upper()}.\nFor {language_name}: Use ONLY {script_name}.\nABSOLUTELY NO English or Roman letters in your response content. JSON keys must stay in English and all values must be in {script_name}, except the FIXED VALUES listed below, which stay in English."
             language_reminder = f"\nREMINDER: YOU MUST RESPOND ONLY IN {language_name.upper()} USING {script_name.upper()}. ABSOLUTELY NO English or Roman letters in response values."
         else:
-            language_instruction = f"Respond in {language_name} using English/Roman letters (romanized/transliterated text).\nJSON keys must be in English. All content values must be in romanized {language_name}."
+            language_instruction = f"Respond in {language_name} using English/Roman letters (romanized/transliterated text).\nJSON keys must be in English. All content values must be in romanized {language_name}, except the FIXED VALUES listed below, which stay in English."
             language_reminder = ""
 
         return f"""{language_instruction}
@@ -157,7 +159,7 @@ ANALYZE AND CATEGORIZE:
    - Employment Law - Unpaid Wages
    - Employment Law - Wrongful Termination
    - Employment Law - Workplace Harassment
-   - Property Law - Tenant Rights
+   - Property Law - Tenant Rights (landlord, rent, deposit, eviction)
    - Property Law - Property Disputes
    - Consumer Rights - Defective Products
    - Consumer Rights - Service Deficiency
@@ -174,78 +176,85 @@ ANALYZE AND CATEGORIZE:
 
 3. PROVIDE EXTREMELY DETAILED ADVICE with immediate actions, step-by-step legal process, where to file, costs, timeline, legal rights and laws, compensation, free resources, and warnings.
 
+LAWS TO CITE:
+- Since 1 July 2024 the IPC, CrPC and Indian Evidence Act are replaced by the Bharatiya Nyaya Sanhita, 2023 (BNS), the Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS) and the Bharatiya Sakshya Adhiniyam, 2023 (BSA).
+- For criminal matters cite ONLY BNS / BNSS / BSA sections. Never cite the IPC, CrPC or Evidence Act as current law. You may add the old number in brackets, e.g. "Section 316 (formerly IPC 406)".
+- Only cite section numbers you are sure of. If unsure, name the Act without a section number.
+- Correct old -> new section numbers (use these, never guess): {reference_table()}
+- Mention free legal aid from the District Legal Services Authority (NALSA helpline 15100) when the person may not afford a lawyer.
+
+FIXED VALUES (always in lowercase English, even when everything else is in another language):
+- "urgency" and "severity": exactly one of "high", "medium", "low"
+- "emotionalState": exactly one of "distressed", "angry", "confused", "frustrated", "calm"
+- In "legalSections", the "act" and "section" values (law name and section number) are always in English, e.g. "Bharatiya Nyaya Sanhita, 2023 (BNS)" and "Section 303". Only "description", "penalty" and "remedy" follow the answer language.
+
 CRITICAL: Return ONLY valid JSON - NO markdown backticks, NO preamble, NO extra text.
 
-Respond in JSON format with these EXACT keys:
+Respond in JSON format with these EXACT keys (the values below describe what to write; do not copy them):
 {{
-  "category": "Consumer Rights - Service Deficiency",
-  "subCategory": "Auto driver overcharged fare",
-  "urgency": "medium",
-  "urgencyReason": "Financial exploitation by public transport operator",
-  "emotionalState": "frustrated",
+  "category": "the most specific category from the list above, e.g. Property Law - Tenant Rights",
+  "subCategory": "a short description of this specific problem",
+  "urgency": "high | medium | low",
+  "urgencyReason": "one sentence on why",
+  "emotionalState": "distressed | angry | confused | frustrated | calm",
   "facts": {{
-    "who": "auto driver and passenger",
-    "what": "overcharging fare",
-    "when": "recent",
-    "where": "public road",
-    "amount": "extra amount charged"
+    "who": "the people involved",
+    "what": "what happened",
+    "when": "when it happened, if said",
+    "where": "where it happened, if said",
+    "amount": "money involved, if any"
   }},
   "legalSections": [
     {{
-      "act": "Consumer Protection Act, 2019",
-      "section": "Section 2(11)",
-      "description": "Deficiency in service by transport provider",
-      "penalty": "Compensation + punitive damages",
-      "remedy": "Refund of excess amount + compensation"
+      "act": "full name of the Act in English",
+      "section": "Section number in English",
+      "description": "what this section says, in simple words",
+      "penalty": "punishment, if any",
+      "remedy": "what the person can get"
     }}
   ],
-  "recommendation": "DETAILED multi-paragraph advice with specific steps, timelines, costs, and resources - minimum 500 words",
-  "nextSteps": [
-    "TODAY: Note auto number, time, route, amount paid vs meter reading",
-    "DAY 1: File complaint on consumerhelpline.gov.in (FREE)",
-    "DAY 2: File complaint at nearest Regional Transport Office (RTO)",
-    "WEEK 1: If unresolved, file at District Consumer Forum (filing fee: ₹500)"
-  ],
-  "requiredDocuments": [
-    "Receipt or note of amount paid",
-    "Auto registration number",
-    "Photo of meter reading if possible",
-    "Bank transaction record if paid digitally"
-  ],
-  "estimatedCost": "Consumer helpline: FREE, RTO complaint: FREE, Consumer Forum: ₹500 filing fee",
-  "timeline": "RTO action: 7-15 days, Consumer Forum: 3-6 months",
-  "severity": "medium",
+  "recommendation": "DETAILED multi-paragraph advice with specific steps, timelines, costs and resources",
+  "nextSteps": ["TODAY: ...", "WEEK 1: ...", "..."],
+  "requiredDocuments": ["documents the person should collect"],
+  "estimatedCost": "costs of each step, saying which are free",
+  "timeline": "how long each step usually takes",
+  "severity": "high | medium | low",
   "resources": [
     {{
-      "name": "National Consumer Helpline",
-      "action": "Call 1800-11-4000 (toll free) or file at consumerhelpline.gov.in",
-      "cost": "FREE",
-      "timeline": "Response within 7 days"
-    }},
-    {{
-      "name": "Regional Transport Office (RTO)",
-      "action": "File complaint against auto driver license/permit",
-      "cost": "FREE",
-      "timeline": "Action within 15 days"
+      "name": "a real helpline, authority or portal",
+      "action": "exactly what to do there",
+      "cost": "cost",
+      "timeline": "how long it takes"
     }}
   ],
-  "legalDisclaimer": "This advice is AI-generated for informational purposes only. Please consult a qualified legal professional before taking any action. Laws may vary by state."
+  "legalDisclaimer": "a one-line reminder that this is AI-generated information, not legal advice"
 }}
 {language_reminder}"""
 
-    def build_petition_generation_prompt(self, facts: Dict[str, Any], legal_category: str, relevant_sections: list) -> str:
-        return f"""You are a legal document drafting assistant for Indian courts. Generate a structured legal petition.
-
+    def build_petition_generation_prompt(self, facts: Dict[str, Any], legal_category: str, relevant_sections: list, language: str = 'en', issue_text: str = '') -> str:
+        language_names = {
+            'en': 'English', 'hi': 'Hindi', 'te': 'Telugu', 'ta': 'Tamil', 'bn': 'Bengali', 'mr': 'Marathi',
+            'gu': 'Gujarati', 'kn': 'Kannada', 'ml': 'Malayalam', 'pa': 'Punjabi',
+        }
+        language_name = language_names.get(language, 'English')
+        issue_line = f"\nThe person's own words: {issue_text}\n" if issue_text else ''
+        return f"""You are a legal document drafting assistant for Indian courts and authorities. Draft a petition / complaint the person can adapt and file.
+{issue_line}
 Facts: {json.dumps(facts, indent=2, ensure_ascii=False)}
 Legal Category: {legal_category}
 Relevant Sections: {', '.join(relevant_sections)}
 
 Generate a petition with three sections:
 1. FACTS: Organize the story chronologically with dates and parties clearly identified
-2. GROUNDS: Cite relevant legal provisions (BNS/BNSS/CPC sections) that support the case
+2. GROUNDS: Cite relevant legal provisions that support the case
 3. PRAYER: Specify the relief sought (monetary compensation, injunction, possession, etc.)
 
-Format your response as JSON with keys: facts_section, grounds_section, prayer_section."""
+Rules:
+- For criminal matters cite the BNS / BNSS / BSA (2023), never the IPC, CrPC or Evidence Act as current law. Only cite section numbers you are sure of.
+- Use placeholders in square brackets, like [Your Name] or [Date], for anything the facts do not say. Never invent names, dates or amounts.
+- Write the section text in {language_name}.
+
+Format your response as JSON with keys: facts_section, grounds_section, prayer_section. Return only the JSON."""
 
     def build_citation_verification_prompt(self, petition_text: str, citations: list) -> str:
         return f"""You are a legal citation verification assistant for Indian law. Review the following citations.

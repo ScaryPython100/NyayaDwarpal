@@ -89,7 +89,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         # Log incoming event for debugging
         print("CHECKPOINT 2: Logging incoming event")
-        print(f"Received event: {json.dumps(event)}")
+        print(f"Received event for path: {event.get('path', '')}")
         
         # Detect event source
         print("CHECKPOINT 3: Detecting event source")
@@ -140,8 +140,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # Route to appropriate handler
         print("CHECKPOINT 10: Routing to appropriate handler")
         
+        if path.endswith("/draft"):
+            return handle_draft_petition(body)
         # /petition/generate now handles text-based verification
-        if path.endswith("/generate"):
+        elif path.endswith("/generate"):
             print("CHECKPOINT 11: Routing to handle_verify_petition_text")
             return handle_verify_petition_text(body)
         # /petition/clarify now handles PDF-based verification
@@ -876,6 +878,57 @@ def generate_summary(status: str, total_issues: int, compliance_score: int) -> s
         return f"Petition has {total_issues} minor defect(s). Compliance score: {compliance_score}/100. Review and address the flagged issues before filing."
     else:
         return f"Petition has {total_issues} defect(s) requiring attention. Compliance score: {compliance_score}/100. Please address all critical and major defects before filing."
+
+
+def handle_draft_petition(body: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Draft a petition / complaint from a triaged case (POST /petition/draft)
+
+    Body: facts (dict), category (str), sections (list of str), language (str), issueText (str)
+    """
+    facts = body.get("facts") or {}
+    category = str(body.get("category") or "").strip()
+    sections = [str(s)[:200] for s in (body.get("sections") or [])][:10]
+    language = str(body.get("language") or "en")[:5]
+    issue_text = str(body.get("issueText") or "")[:3000]
+
+    if not isinstance(facts, dict) or not (category or issue_text):
+        return create_response(
+            400,
+            APIResponse.error_response("Missing case details", "facts and category (or issueText) are required")
+        )
+
+    prompt = bedrock_client.build_petition_generation_prompt(
+        facts=facts,
+        legal_category=category or "General",
+        relevant_sections=sections,
+        language=language,
+        issue_text=issue_text,
+    )
+
+    for attempt in range(2):
+        try:
+            result = bedrock_client.invoke_model(prompt=prompt, max_tokens=3000, temperature=0.3)
+            text = result["text"]
+            start, end = text.find("{"), text.rfind("}")
+            draft = json.loads(text[start:end + 1])
+            sections_out = {
+                key: draft.get(key, "") if isinstance(draft.get(key, ""), str) else json.dumps(draft.get(key), ensure_ascii=False)
+                for key in ("facts_section", "grounds_section", "prayer_section")
+            }
+            if not any(sections_out.values()):
+                raise ValueError("Empty draft")
+            return create_response(
+                200,
+                APIResponse.success_response("Petition draft generated", data=sections_out)
+            )
+        except Exception as e:
+            print(f"Draft attempt {attempt + 1} failed: {str(e)}")
+
+    return create_response(
+        502,
+        APIResponse.error_response("Draft failed", "Could not draft the petition. Please try again.")
+    )
 
 
 def create_response(status_code: int, body: APIResponse) -> Dict[str, Any]:

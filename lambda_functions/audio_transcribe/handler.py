@@ -15,6 +15,22 @@ except ImportError:
     REQUESTS_AVAILABLE = False
     logger.error("requests library not available - Lambda layer may be missing")
 
+SUPPORTED_LANGUAGES = {
+    'unknown', 'en-IN', 'hi-IN', 'bn-IN', 'gu-IN', 'kn-IN', 'ml-IN', 'mr-IN', 'od-IN', 'pa-IN', 'ta-IN', 'te-IN'
+}
+
+# Browser recording format -> file name and type sent to Sarvam (Safari records mp4, Chrome/Firefox webm/ogg)
+AUDIO_TYPES = {
+    'audio/webm': ('recording.webm', 'audio/webm'),
+    'audio/ogg': ('recording.ogg', 'audio/ogg'),
+    'audio/mp4': ('recording.m4a', 'audio/mp4'),
+    'audio/x-m4a': ('recording.m4a', 'audio/mp4'),
+    'audio/aac': ('recording.aac', 'audio/aac'),
+    'audio/mpeg': ('recording.mp3', 'audio/mpeg'),
+    'audio/wav': ('recording.wav', 'audio/wav'),
+}
+
+
 def lambda_handler(event, context):
     """
     Lambda function to transcribe audio using Sarvam AI
@@ -59,7 +75,13 @@ def lambda_handler(event, context):
         
         body = json.loads(body_str)
         audio_base64 = body.get('audio')
-        language_code = body.get('language_code', 'en-IN')
+        language_code = body.get('language_code') or 'unknown'
+        if language_code not in SUPPORTED_LANGUAGES:
+            language_code = 'unknown'  # let Sarvam detect the language
+        filename, content_type = AUDIO_TYPES.get(
+            (body.get('mime_type') or '').split(';')[0].strip().lower(),
+            ('recording.webm', 'audio/webm')
+        )
         
         logger.info(f"Language code: {language_code}")
         logger.info(f"Audio data length: {len(audio_base64) if audio_base64 else 0}")
@@ -80,15 +102,15 @@ def lambda_handler(event, context):
         if not sarvam_api_key:
             logger.error("SARVAM_API_KEY environment variable not set")
             return {
-                'statusCode': 500,
+                'statusCode': 503,
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
-                    'error': 'Sarvam API key not configured'
+                    'errorCode': 'service_unavailable',
+                    'error': 'Voice input is not available right now. Please type your issue instead.'
                 })
             }
         
-        logger.info(f"Sarvam API key found: {sarvam_api_key[:10]}...")
         
         # Decode base64 audio
         try:
@@ -110,11 +132,12 @@ def lambda_handler(event, context):
         
         # Prepare multipart form data
         files = {
-            'file': ('recording.webm', audio_bytes, 'audio/webm')
+            'file': (filename, audio_bytes, content_type)
         }
         
         data = {
             'model': 'saaras:v3',
+            'mode': 'transcribe',
             'language_code': language_code
         }
         
@@ -134,7 +157,6 @@ def lambda_handler(event, context):
                 timeout=30
             )
             logger.info(f"Sarvam AI response status: {response.status_code}")
-            logger.info(f"Sarvam AI response: {response.text[:500]}")
         except requests.exceptions.Timeout:
             logger.error("Sarvam AI request timeout")
             return {
@@ -157,14 +179,20 @@ def lambda_handler(event, context):
             }
         
         if response.status_code != 200:
-            error_text = response.text
-            logger.error(f"Sarvam AI error: {error_text}")
+            logger.error(f"Sarvam AI error {response.status_code}: {response.text[:300]}")
+            if response.status_code in (401, 403):
+                error_code, message, status = 'service_unavailable', 'Voice input is not available right now. Please type your issue instead.', 503
+            elif response.status_code == 429:
+                error_code, message, status = 'busy', 'Too many people are using voice input. Please try again in a minute.', 503
+            else:
+                error_code, message, status = 'audio_invalid', 'We could not understand this recording. Please try again, speaking for less than 30 seconds.', 400
             return {
-                'statusCode': response.status_code,
+                'statusCode': status,
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
-                    'error': f'Sarvam AI transcription failed: {error_text}'
+                    'errorCode': error_code,
+                    'error': message
                 })
             }
         
@@ -172,7 +200,7 @@ def lambda_handler(event, context):
         sarvam_data = response.json()
         transcript = sarvam_data.get('transcript') or sarvam_data.get('text', '')
         
-        logger.info(f"Transcript received: {transcript[:100] if transcript else 'EMPTY'}...")
+        logger.info(f"Transcript received: {len(transcript or '')} characters")
         
         if not transcript or transcript.strip() == '':
             logger.warning("No speech detected in audio")
@@ -181,6 +209,7 @@ def lambda_handler(event, context):
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
+                    'errorCode': 'no_speech',
                     'error': 'No speech detected in audio'
                 })
             }
@@ -194,9 +223,9 @@ def lambda_handler(event, context):
                 'success': True,
                 'data': {
                     'transcript': transcript,
-                    'language_code': language_code
+                    'language_code': sarvam_data.get('language_code') or language_code
                 }
-            })
+            }, ensure_ascii=False)
         }
         
     except json.JSONDecodeError as e:

@@ -11,6 +11,7 @@ This Lambda function verifies legal documents for common errors:
 
 import json
 import base64
+import boto3
 import os
 import sys
 from typing import Dict, Any, List
@@ -23,6 +24,10 @@ from bedrock_client import BedrockClient
 
 # Initialize Bedrock client
 bedrock_client = BedrockClient()
+
+
+MAX_VERIFY_CHARS = 8000
+TEXTRACT_REGION = 'ap-south-1'
 
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -63,13 +68,13 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         try:
             document_bytes = base64.b64decode(document_base64)
         except Exception as e:
-            return error_response(f'Invalid base64 encoding: {str(e)}')
+            return error_response('The file could not be read. Please upload it again.', status_code=400)
         
         # Extract text based on file type
         extracted_text = extract_text(document_bytes, file_type, file_name)
         
         if not extracted_text or len(extracted_text.strip()) < 10:
-            return error_response('Could not extract sufficient text from document')
+            return error_response('We could not find enough text in this file. Try a clearer photo, a PDF with selectable text, or a .txt file.', status_code=400)
         
         # Verify document using Bedrock
         verification_result = verify_document(extracted_text, file_name)
@@ -91,7 +96,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
     except Exception as e:
         print(f"Error in document verification: {str(e)}")
-        return error_response(str(e))
+        if isinstance(e, ValueError):
+            return error_response(str(e), status_code=400)
+        return error_response('We could not check this document. Please try again.')
 
 
 def extract_text(document_bytes: bytes, file_type: str, file_name: str) -> str:
@@ -111,9 +118,11 @@ def extract_text(document_bytes: bytes, file_type: str, file_name: str) -> str:
             return extract_text_from_txt(document_bytes)
         elif file_type == 'pdf' or file_name.endswith('.pdf'):
             return extract_text_from_pdf(document_bytes)
-        elif file_type in ['docx', 'doc'] or file_name.endswith(('.docx', '.doc')):
+        elif file_type == 'doc' or file_name.lower().endswith('.doc'):
+            raise ValueError('Old .doc files are not supported. Please save the file as .docx or PDF and upload again.')
+        elif file_type == 'docx' or file_name.lower().endswith('.docx'):
             return extract_text_from_docx(document_bytes)
-        elif file_type in ['jpg', 'jpeg', 'png', 'tiff', 'bmp'] or file_name.endswith(('.jpg', '.jpeg', '.png', '.tiff', '.bmp')):
+        elif file_type in ['jpg', 'jpeg', 'png'] or file_name.lower().endswith(('.jpg', '.jpeg', '.png')):
             return extract_text_from_image(document_bytes)
         else:
             raise ValueError(f'Unsupported file type: {file_type}')
@@ -145,11 +154,13 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
         pdf_file = BytesIO(pdf_bytes)
         pdf_reader = PyPDF2.PdfReader(pdf_file)
         
-        text = []
-        for page in pdf_reader.pages:
-            text.append(page.extract_text())
-        
-        return '\n'.join(text)
+        text = '\n'.join(page.extract_text() or '' for page in pdf_reader.pages)
+        if len(text.strip()) >= 20:
+            return text
+        # Scanned PDF with no text layer: read it with Textract (single-page PDFs)
+        if len(pdf_reader.pages) > 1:
+            raise ValueError('This looks like a scanned PDF with several pages. Please upload a photo of each page, or a PDF with selectable text.')
+        return extract_text_with_textract(pdf_bytes)
     except Exception as e:
         print(f"Error extracting PDF text: {str(e)}")
         raise ValueError(f'Failed to extract text from PDF: {str(e)}')
@@ -172,16 +183,18 @@ def extract_text_from_docx(docx_bytes: bytes) -> str:
         raise ValueError(f'Failed to extract text from DOCX: {str(e)}')
 
 
+def extract_text_with_textract(document_bytes: bytes) -> str:
+    """OCR with AWS Textract (JPEG, PNG or single-page PDF, up to 5 MB)"""
+    textract = boto3.client('textract', region_name=TEXTRACT_REGION)
+    response = textract.detect_document_text(Document={'Bytes': document_bytes})
+    lines = [block['Text'] for block in response.get('Blocks', []) if block.get('BlockType') == 'LINE']
+    return '\n'.join(lines)
+
+
 def extract_text_from_image(image_bytes: bytes) -> str:
-    """Extract text from image using pytesseract (OCR)"""
+    """Extract text from a photo or scan (JPEG/PNG) with AWS Textract"""
     try:
-        from PIL import Image
-        import pytesseract
-        
-        image = Image.open(BytesIO(image_bytes))
-        text = pytesseract.image_to_string(image)
-        
-        return text
+        return extract_text_with_textract(image_bytes)
     except Exception as e:
         print(f"Error extracting image text: {str(e)}")
         raise ValueError(f'Failed to extract text from image: {str(e)}')
@@ -200,47 +213,40 @@ def verify_document(text: str, file_name: str) -> Dict[str, Any]:
     """
     prompt = build_verification_prompt(text, file_name)
     
-    try:
-        result = bedrock_client.invoke_model(
-            prompt=prompt,
-            max_tokens=2000,
-            temperature=0.3
-        )
-        
-        # Parse JSON response
-        response_text = result['text'].strip()
-        print(f"Bedrock response: {response_text[:500]}...")
-        
-        # Remove markdown code blocks if present
-        if response_text.startswith('```'):
-            response_text = response_text.split('```')[1]
-            if response_text.startswith('json'):
-                response_text = response_text[4:]
-            response_text = response_text.rsplit('```', 1)[0]
-        
-        verification = json.loads(response_text)
-        
-        return {
-            'fileName': file_name,
-            'issues': verification.get('issues', []),
-            'summary': verification.get('summary', 'Document verification complete'),
-            'overallSeverity': verification.get('overallSeverity', 'LOW'),
-            'timestamp': verification.get('timestamp', '')
-        }
-        
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error: {str(e)}")
-        print(f"Response text: {response_text}")
-        return {
-            'fileName': file_name,
-            'issues': [],
-            'summary': 'Could not parse verification results',
-            'overallSeverity': 'MEDIUM',
-            'timestamp': ''
-        }
-    except Exception as e:
-        print(f"Error in document verification: {str(e)}")
-        raise
+    last_error = None
+    for attempt in range(2):
+        try:
+            result = bedrock_client.invoke_model(
+                prompt=prompt,
+                max_tokens=2000,
+                temperature=0.3
+            )
+            response_text = result['text']
+            start, end = response_text.find('{'), response_text.rfind('}')
+            if start == -1 or end == -1:
+                raise ValueError('No JSON object in response')
+            verification = json.loads(response_text[start:end + 1])
+            issues = verification.get('issues', [])
+            if not isinstance(issues, list):
+                raise ValueError('issues is not a list')
+            for issue in issues:
+                issue['severity'] = str(issue.get('severity', 'LOW')).upper()
+                # Uploaded copies are often unsigned drafts: never rank that above minor
+                if str(issue.get('type', '')).lower() in ('signature', 'witness', 'stamp'):
+                    issue['severity'] = 'LOW'
+                if issue['severity'] not in ('HIGH', 'MEDIUM', 'LOW'):
+                    issue['severity'] = 'MEDIUM'
+            return {
+                'fileName': file_name,
+                'issues': issues,
+                'summary': verification.get('summary', 'Document verification complete'),
+                'overallSeverity': str(verification.get('overallSeverity', 'LOW')).upper(),
+                'truncated': len(text) > MAX_VERIFY_CHARS,
+            }
+        except (json.JSONDecodeError, ValueError) as e:
+            last_error = e
+            print(f"Verification parse attempt {attempt + 1} failed: {str(e)}")
+    raise RuntimeError(f'Could not read the AI response: {last_error}')
 
 
 def build_verification_prompt(text: str, file_name: str) -> str:
@@ -259,7 +265,7 @@ def build_verification_prompt(text: str, file_name: str) -> str:
 DOCUMENT NAME: {file_name}
 
 DOCUMENT TEXT:
-{text[:4000]}  
+{text[:MAX_VERIFY_CHARS]}
 
 ANALYZE FOR THE FOLLOWING ISSUES:
 
@@ -271,7 +277,8 @@ ANALYZE FOR THE FOLLOWING ISSUES:
    - Inconsistent date formats
    - Missing dates in critical sections
 4. **Spelling Mistakes**: Identify spelling errors in legal terms and general text
-5. **Legal Document Errors**:
+5. **Unfair or Illegal Clauses** (most important): clauses that are one-sided or against Indian law, e.g. non-refundable security deposits, entry without notice, unfair termination or notice periods, waiving statutory rights, penalties far above actual loss, disputes decided only by one party. Name the Indian law it conflicts with when you are sure (e.g. Indian Contract Act 1872 s.23 / s.74, Model Tenancy Act 2021, Consumer Protection Act 2019, labour codes).
+6. **Legal Document Errors**:
    - Missing mandatory clauses
    - Incomplete sentences
    - Missing party information
@@ -280,7 +287,7 @@ ANALYZE FOR THE FOLLOWING ISSUES:
    - Incorrect legal terminology
 
 For each issue found, provide:
-- **type**: Category (signature, name, date, spelling, legal, formatting)
+- **type**: Category (unfair_clause, signature, name, date, spelling, legal, formatting)
 - **severity**: HIGH (critical legal issue), MEDIUM (important but not critical), LOW (minor issue)
 - **description**: Clear description of the issue
 - **location**: Where in the document (e.g., "Page 1, Paragraph 3" or "Signature section")
@@ -310,6 +317,7 @@ Respond in JSON format with these EXACT keys:
 }}
 
 IMPORTANT:
+- The text may be a draft or an unsigned copy: report missing signatures, witnesses or stamp duty at most once, as LOW severity.
 - If no issues found, return empty issues array with summary "No issues found. Document appears to be properly formatted."
 - Be thorough but practical - focus on issues that could cause legal problems
 - Provide actionable suggestions for each issue
@@ -317,10 +325,10 @@ IMPORTANT:
 Respond with ONLY the JSON object, no markdown formatting."""
 
 
-def error_response(error_message: str) -> Dict[str, Any]:
+def error_response(error_message: str, status_code: int = 500) -> Dict[str, Any]:
     """Generate error response"""
     return {
-        'statusCode': 500,
+        'statusCode': status_code,
         'headers': {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
