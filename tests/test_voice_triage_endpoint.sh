@@ -79,7 +79,7 @@ if echo "$RESPONSE" | jq . > /dev/null 2>&1; then
     if [ "$CATEGORY" = "Other" ]; then
         echo "❌ FAILED: Category is 'Other'"
         echo ""
-        echo "This means the GROQ_API_KEY is still not set or there's an error."
+        echo "This means Bedrock model access is missing or there's an error."
         echo "Check CloudWatch logs for details."
     elif [[ "$CATEGORY" == *"Consumer"* ]]; then
         echo "✅ SUCCESS: Category correctly identified as Consumer Rights!"

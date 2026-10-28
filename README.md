@@ -113,7 +113,8 @@ set -a; source .env; set +a
 | Variable | Needed for |
 |---|---|
 | `SARVAM_API_KEY` | Speech-to-text and document translation |
-| `GROQ_API_KEY` | Nothing any more (left over from before the move to Bedrock); can be empty |
+
+Bedrock and Textract use your AWS credentials, so they need no key.
 
 Keys are passed to the Lambdas as environment variables at deploy time. Never commit `.env`.
 
@@ -132,7 +133,11 @@ Open `ui/index.html` in a browser, or serve the folder (for example `python3 -m 
 
 ### Tests
 
-`tests/` has scripts that call a deployed API (`test_voice_triage.py`, `test_document_translator.py`, …); change their base URL to your own deployment first. The unit tests in `tests/unit` (`pytest tests/unit`) were written for the earlier Claude-based Bedrock client and most of them fail against the current Nova Lite client.
+```bash
+pytest tests/unit
+```
+
+The unit tests mock AWS, so they need no account or keys. `tests/` also has scripts that call a deployed API (`test_voice_triage.py`, `test_document_translator.py`, …); change their base URL to your own deployment first.
 
 ## API
 
@@ -157,7 +162,7 @@ NyayaDwarpal/
 │   └── nyaya_dwarpal_stack.py     # S3, DynamoDB, IAM, Lambdas, API Gateway
 ├── lambda_functions/
 │   ├── shared/                    # Lambda layer: Bedrock client, AWS helpers, models
-│   │   └── python/                #   the code the layer actually ships
+│   │   └── python/                #   the copy the layer ships (kept identical; a test checks)
 │   ├── audio_transcribe/          # Speech-to-text via Sarvam AI
 │   ├── voice_triage/              # Urgency, classification and BNS sections via Bedrock
 │   ├── document_verifier/         # Clause risk check (PDF, DOCX, TXT)

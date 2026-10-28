@@ -392,7 +392,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
                     'description': ''
                 })
         
-        # Parse nextSteps - Groq might return string instead of array
+        # Parse nextSteps - The model might return string instead of array
         next_steps = classification.get('nextSteps', [])
         if isinstance(next_steps, str):
             # Split by comma and clean up
@@ -400,7 +400,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
         elif not isinstance(next_steps, list):
             next_steps = []
         
-        # Parse requiredDocuments - Groq might return string instead of array
+        # Parse requiredDocuments - The model might return string instead of array
         required_docs = classification.get('requiredDocuments', [])
         if isinstance(required_docs, str):
             # Split by comma and clean up
@@ -408,7 +408,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
         elif not isinstance(required_docs, list):
             required_docs = []
         
-        # Parse resources - Groq might return string instead of array
+        # Parse resources - The model might return string instead of array
         resources = classification.get('resources', [])
         if isinstance(resources, str):
             # If it's a string, wrap it in a list

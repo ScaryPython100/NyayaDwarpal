@@ -299,7 +299,6 @@ class NyayaDwarpalStack(Stack):
                 "SESSION_TABLE": self.session_table.table_name,
                 "BEDROCK_REGION": "us-east-1",
                 "SARVAM_AI_ENDPOINT": "https://api.sarvam.ai/v1",
-                "GROQ_API_KEY": os.environ.get("GROQ_API_KEY", ""),
             },
             tracing=lambda_.Tracing.ACTIVE,
         )
@@ -406,7 +405,6 @@ class NyayaDwarpalStack(Stack):
             timeout=Duration.seconds(60),
             memory_size=1024,
             environment={
-                "GROQ_API_KEY": os.environ.get("GROQ_API_KEY", ""),
             },
             tracing=lambda_.Tracing.ACTIVE,
         )

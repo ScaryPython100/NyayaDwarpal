@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Local test script for Voice Triage Lambda
-Tests the Groq API integration and category classification
+Tests the Bedrock (Nova Lite) integration and category classification
 """
 
 import json
@@ -30,14 +30,7 @@ def test_voice_triage():
     print(f"Use Native Script: {use_native_script}")
     print("\n" + "=" * 80)
     
-    # Check if GROQ_API_KEY is set
-    api_key = os.environ.get("GROQ_API_KEY")
-    if not api_key:
-        print("\n❌ ERROR: GROQ_API_KEY environment variable not set!")
-        print("Please set it with: export GROQ_API_KEY='your-api-key'")
-        return
-    
-    print(f"\n✓ GROQ_API_KEY found (length: {len(api_key)})")
+    # Bedrock uses your AWS credentials (aws configure) and needs Nova Lite access in us-east-1
     
     # Initialize Bedrock client
     print("\n" + "-" * 80)
@@ -61,9 +54,9 @@ def test_voice_triage():
     print("...")
     print("-" * 80)
     
-    # Call Groq API
+    # Call Bedrock
     print("\n" + "-" * 80)
-    print("STEP 3: Calling Groq API")
+    print("STEP 3: Calling Bedrock")
     print("-" * 80)
     
     system_prompt = "You are an expert Indian lawyer with 20+ years of experience. You MUST provide detailed, actionable legal advice. NEVER say 'consult a lawyer' as generic advice. Always give specific steps, costs, timelines, and resources. Choose the most specific legal category - DO NOT return 'Other' unless absolutely necessary."
@@ -80,7 +73,7 @@ def test_voice_triage():
             system_prompt=system_prompt
         )
         
-        print("\n✓ Groq API call successful!")
+        print("\n✓ Bedrock call successful!")
         print(f"Response length: {len(result['text'])} characters")
         print(f"Token usage: {result.get('usage', {})}")
         
@@ -157,7 +150,7 @@ def test_voice_triage():
             print(response_text)
             
     except Exception as e:
-        print(f"\n❌ ERROR calling Groq API: {str(e)}")
+        print(f"\n❌ ERROR calling Bedrock: {str(e)}")
         import traceback
         traceback.print_exc()
 

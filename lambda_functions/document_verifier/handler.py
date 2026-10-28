@@ -21,7 +21,7 @@ sys.path.insert(0, '/opt/python')
 
 from bedrock_client import BedrockClient
 
-# Initialize Groq client
+# Initialize Bedrock client
 bedrock_client = BedrockClient()
 
 
@@ -71,7 +71,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if not extracted_text or len(extracted_text.strip()) < 10:
             return error_response('Could not extract sufficient text from document')
         
-        # Verify document using Groq
+        # Verify document using Bedrock
         verification_result = verify_document(extracted_text, file_name)
         
         # Return response
@@ -189,7 +189,7 @@ def extract_text_from_image(image_bytes: bytes) -> str:
 
 def verify_document(text: str, file_name: str) -> Dict[str, Any]:
     """
-    Verify document for common legal document errors using Groq
+    Verify document for common legal document errors using Bedrock
     
     Args:
         text: Extracted document text
@@ -209,7 +209,7 @@ def verify_document(text: str, file_name: str) -> Dict[str, Any]:
         
         # Parse JSON response
         response_text = result['text'].strip()
-        print(f"Groq response: {response_text[:500]}...")
+        print(f"Bedrock response: {response_text[:500]}...")
         
         # Remove markdown code blocks if present
         if response_text.startswith('```'):
@@ -252,7 +252,7 @@ def build_verification_prompt(text: str, file_name: str) -> str:
         file_name: File name
         
     Returns:
-        Formatted prompt for Groq
+        Formatted prompt for Bedrock
     """
     return f"""You are an expert legal document reviewer. Analyze the following document for common errors and issues.
 

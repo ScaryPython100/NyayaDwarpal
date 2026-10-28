@@ -7,7 +7,7 @@ Simulates the exact response format from voice_triage Lambda
 import json
 from datetime import datetime
 
-# Simulate classification result from Groq
+# Simulate classification result from Bedrock
 classification_result = {
     'category': 'Consumer Rights',
     'subCategory': 'Service Deficiency',
