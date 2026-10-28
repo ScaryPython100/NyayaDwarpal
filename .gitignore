@@ -1,0 +1,48 @@
+# Secrets: never commit real keys
+.env
+.env.*
+!.env.example
+*.env
+
+# AWS CDK output
+cdk.out/
+.cdk.staging/
+.aws/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (CDK CLI)
+node_modules/
+
+# Lambda dependencies installed with `pip install -t` (see README)
+lambda_functions/shared/python/*
+!lambda_functions/shared/python/__init__.py
+!lambda_functions/shared/python/aws_helpers.py
+!lambda_functions/shared/python/bedrock_client.py
+!lambda_functions/shared/python/models.py
+lambda_functions/audio_transcribe/python/
+lambda_functions/document_verifier/*/
+lambda_functions/document_verifier/*.py
+!lambda_functions/document_verifier/__init__.py
+!lambda_functions/document_verifier/handler.py
+
+# Build bundles, backups and logs
+*.zip
+*.bak
+*_backup.py
+*.log
+logs/
+archives/
+output.json
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

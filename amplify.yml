@@ -1,0 +1,15 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "No API key injection needed - using backend transcribe endpoint"
+    build:
+      commands:
+        - echo "Build complete"
+  artifacts:
+    baseDirectory: ui
+    files:
+      - '**/*'
+  cache:
+    paths: []

@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyaya-Dwarpal - Justice Guardian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'nyaya-blue': '#1A237E',
+                        'nyaya-blue-light': '#3949AB',
+                        'justice-gold': '#C5A059',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Pulsing glow ring animation */
+        @keyframes pulse-glow {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 0.6;
+                box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.7);
+            }
+            50% { 
+                transform: scale(1.1); 
+                opacity: 0.8;
+                box-shadow: 0 0 0 20px rgba(197, 160, 89, 0);
+            }
+        }
+        
+        .pulse-glow-ring {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        /* Waveform bars animation */
+        @keyframes bounce-bar {
+            0%, 100% { height: 20%; }
+            50% { height: 100%; }
+        }
+        
+        .waveform-bar {
+            animation: bounce-bar 0.8s ease-in-out infinite;
+        }
+        
+        /* Slide in animation for BNS panel */
+        @keyframes slide-in-right {
+            from { 
+                transform: translateX(100%); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+        }
+        
+        .slide-in-right {
+            animation: slide-in-right 0.4s ease-out;
+        }
+        
+        /* Slide up animation */
+        @keyframes slide-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .slide-up { animation: slide-up 0.3s ease-out; }
+        
+        /* Drag and drop zone styles */
+        .drag-over {
+            border-color: #C5A059 !important;
+            background-color: rgba(197, 160, 89, 0.1) !important;
+        }
+        
+        /* Progress bar animation */
+        @keyframes progress {
+            from { width: 0%; }
+        }
+        
+        .progress-bar {
+            animation: progress 2s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 z-50 h-full w-72 bg-nyaya-blue text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <div class="flex items-center justify-between h-16 px-6 border-b border-nyaya-blue-light">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-justice-gold rounded-lg flex items-center justify-center">
+                    <span class="text-nyaya-blue font-bold text-xl">न्याय</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">Nyaya-Dwarpal</h1>
+                    <p class="text-xs text-gray-300 justice-guardian-subtitle">Justice Guardian</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="mt-6 px-3">
+            <ul class="space-y-2">
+                <li>
+                    <a href="javascript:void(0)" onclick="showPage('page-dashboard'); return false;" class="nav-link active flex items-center space-x-3 px-4 py-3 rounded-lg bg-justice-gold text-nyaya-blue shadow-lg transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span class="font-medium nav-label">Dashboard</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="javascript:void(0)" onclick="showPage('page-voice-triage'); return false;" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-nyaya-blue-light/50 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                        <span class="font-medium nav-label">Voice Triage</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="showPage('page-verify-document'); return false;" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-nyaya-blue-light/50 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="font-medium nav-label">📋 Verify Document</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="showPage('page-case-memory'); return false;" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-nyaya-blue-light/50 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <span class="font-medium nav-label">🗂️ Case History</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="showPage('page-legal-library'); return false;" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-nyaya-blue-light/50 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        <span class="font-medium nav-label">Legal Library</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        
+        <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-nyaya-blue-light">
+            <div class="text-xs text-gray-400">
+                <p>AI-powered legal assistant for Indian citizens — Voice triage, document verification, and multilingual legal advice in 10+ Indian languages. Built for AI for Bharat Hackathon using AWS Lambda, Sarvam AI, and AWS Bedrock.</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-72">
+        <!-- Header -->
+        <header class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+            <div class="flex items-center justify-between h-16 px-4 lg:px-8">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h2 id="page-title" class="text-xl font-bold text-gray-900">Voice Triage</h2>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <select id="ui-language" onchange="changeUILanguage(this.value)"
+                        class="px-3 py-2 rounded-lg text-sm font-medium border border-justice-gold text-justice-gold bg-white focus:outline-none cursor-pointer">
+                        <option value="en">🌐 English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="mr">मराठी</option>
+                    </select>
+                    <button class="p-2 rounded-lg hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <main id="page-dashboard" style="display: none;">
+            <div class="p-4 lg:p-8">
+            <div class="max-w-7xl mx-auto">
+                <!-- Hero Section -->
+                <div class="text-center mb-12">
+                    <h1 id="dash-welcome" class="text-5xl font-bold text-nyaya-blue mb-4">Welcome to Nyaya-Dwarpal</h1>
+                    <p id="dash-tagline" class="text-2xl text-justice-gold font-semibold">Justice in Your Language</p>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-nyaya-blue/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-nyaya-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="total-cases-stat">0</p>
+                        <p id="dash-total-cases" class="text-sm text-gray-600 mt-1">Total Cases Filed</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-justice-gold/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-justice-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="total-docs-stat">0</p>
+                        <p id="dash-docs-translated" class="text-sm text-gray-600 mt-1">Documents Translated</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-nyaya-blue/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-nyaya-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">10+</p>
+                        <p id="dash-lang-supported" class="text-sm text-gray-600 mt-1">Languages Supported</p>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-nyaya-blue to-nyaya-blue-light rounded-xl shadow-sm p-6 text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold">AWS Bedrock</p>
+                        <p class="text-sm text-white/80 mt-1">Powered by AI</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-12">
+                    <h3 id="dash-quick-actions" class="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <button onclick="showPage('page-voice-triage'); return false;" class="bg-white rounded-xl shadow-sm border-2 border-gray-200 p-8 hover:border-justice-gold hover:shadow-lg transition-all text-left group">
+                            <div class="w-16 h-16 bg-gradient-to-br from-nyaya-blue to-nyaya-blue-light rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </div>
+                            <h4 id="dash-vt-title" class="text-xl font-bold text-gray-900 mb-2">Voice Triage</h4>
+                            <p id="dash-vt-desc" class="text-gray-600">Describe your legal issue in your own words</p>
+                        </button>
+
+                        <button onclick="showPage('page-verify-document'); return false;" class="bg-white rounded-xl shadow-sm border-2 border-gray-200 p-8 hover:border-justice-gold hover:shadow-lg transition-all text-left group">
+                            <div class="w-16 h-16 bg-gradient-to-br from-justice-gold to-yellow-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <h4 id="dash-doc-title" class="text-xl font-bold text-gray-900 mb-2">Document Upload</h4>
+                            <p id="dash-doc-desc" class="text-gray-600">Translate legal documents to your language</p>
+                        </button>
+
+                        <button onclick="showPage('page-case-memory'); return false;" class="bg-white rounded-xl shadow-sm border-2 border-gray-200 p-8 hover:border-justice-gold hover:shadow-lg transition-all text-left group">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                </svg>
+                            </div>
+                            <h4 id="dash-ch-title" class="text-xl font-bold text-gray-900 mb-2">Case History</h4>
+                            <p id="dash-ch-desc" class="text-gray-600">View your previous voice triage searches</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h3>
+                    <div id="recent-activity-loading" class="text-center py-8">
+                        <div class="inline-block w-8 h-8 border-4 border-gray-200 border-t-justice-gold rounded-full animate-spin"></div>
+                        <p class="mt-2 text-sm text-gray-600">Loading recent cases...</p>
+                    </div>
+                    <div id="recent-activity-container" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Recent cases will be inserted here -->
+                    </div>
+                    <div id="recent-activity-empty" class="hidden text-center py-12 bg-white rounded-xl border border-gray-200">
+                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <p class="text-gray-600">No cases yet</p>
+                        <p class="text-sm text-gray-500 mt-1">Start by using Voice Triage</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Voice Triage Page -->
+        <main id="page-voice-triage" style="display: none;">
+            <div class="p-4 lg:p-8">
+            <div class="flex gap-6">
+                <!-- Left: Main Content -->
+                <div class="flex-1">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Voice Triage</h3>
+                        <p class="text-gray-600">Describe your legal issue in your own words</p>
+                    </div>
+
+                    <!-- Input Method Tabs -->
+                    <div class="max-w-2xl mx-auto mb-8">
+                        <div class="flex border-b border-gray-200 mb-6">
+                            <button id="tab-voice" onclick="switchInputTab('voice')" class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-nyaya-blue text-nyaya-blue transition-colors">
+                                🎤 Voice Input
+                            </button>
+                            <button id="tab-text" onclick="switchInputTab('text')" class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">
+                                ⌨️ Type Your Issue
+                            </button>
+                        </div>
+                        
+                        <!-- Script Toggle -->
+                        <div class="max-w-2xl mx-auto mb-6">
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <svg class="w-5 h-5 text-nyaya-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                                        </svg>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900">Script Preference</p>
+                                            <p class="text-xs text-gray-500">Choose how you want to see the response</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <span id="script-label" class="text-sm font-medium text-gray-700">Native Script</span>
+                                        <button id="script-toggle" onclick="toggleScript()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-nyaya-blue transition-colors focus:outline-none focus:ring-2 focus:ring-nyaya-blue focus:ring-offset-2">
+                                            <span id="script-toggle-dot" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice Input Section -->
+                    <div id="voice-input-section" class="max-w-2xl mx-auto">
+                        <!-- Microphone Button with Pulsing Ring -->
+                        <div id="mic-container" class="flex flex-col items-center space-y-6 mb-8">
+                            <div class="relative">
+                                <!-- Pulsing glow ring -->
+                                <div id="pulse-ring" class="absolute inset-0 rounded-full border-4 border-justice-gold pulse-glow-ring"></div>
+                                
+                                <!-- Waveform bars (hidden initially) -->
+                                <div id="waveform-ring" class="hidden absolute inset-0 flex items-center justify-center">
+                                    <div class="flex items-end space-x-1 h-16">
+                                        <div class="w-1.5 bg-justice-gold rounded-full waveform-bar" style="animation-delay: 0s"></div>
+                                        <div class="w-1.5 bg-justice-gold rounded-full waveform-bar" style="animation-delay: 0.1s"></div>
+                                        <div class="w-1.5 bg-justice-gold rounded-full waveform-bar" style="animation-delay: 0.2s"></div>
+                                        <div class="w-1.5 bg-justice-gold rounded-full waveform-bar" style="animation-delay: 0.3s"></div>
+                                        <div class="w-1.5 bg-justice-gold rounded-full waveform-bar" style="animation-delay: 0.4s"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Microphone button -->
+                                <button id="mic-button" onclick="toggleRecording()" class="relative w-32 h-32 rounded-full bg-gradient-to-br from-nyaya-blue to-nyaya-blue-light flex items-center justify-center shadow-2xl shadow-nyaya-blue/30 transition-all duration-300 hover:scale-110 hover:shadow-justice-gold/50 z-10">
+                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="text-center">
+                                <p id="mic-status" class="text-lg font-semibold text-gray-900">Click to Start Recording</p>
+                                <p class="text-sm text-gray-600">Speak clearly about your legal issue</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Input Section (Hidden by default) -->
+                    <div id="text-input-section" class="hidden max-w-2xl mx-auto">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="mb-4">
+                                <label for="text-language" class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                                <select id="text-language" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nyaya-blue focus:border-transparent">
+                                    <option value="hi">Hindi (हिंदी)</option>
+                                    <option value="en">English</option>
+                                    <option value="ta">Tamil (தமிழ்)</option>
+                                    <option value="te">Telugu (తెలుగు)</option>
+                                    <option value="bn">Bengali (বাংলা)</option>
+                                    <option value="mr">Marathi (मराठी)</option>
+                                    <option value="gu">Gujarati (ગુજરાતી)</option>
+                                    <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                                    <option value="ml">Malayalam (മലയാളം)</option>
+                                    <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="text-issue" class="block text-sm font-medium text-gray-700 mb-2">Describe Your Legal Issue</label>
+                                <textarea id="text-issue" rows="8" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nyaya-blue focus:border-transparent resize-none" placeholder="Type your legal issue here in detail..."></textarea>
+                            </div>
+                            <button onclick="analyzeTextIssue()" class="w-full bg-gradient-to-r from-nyaya-blue to-nyaya-blue-light text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                                <span>Analyse My Issue</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Document Upload Section -->
+                    <div class="max-w-2xl mx-auto mb-8">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Or Upload Documents</h4>
+                        <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-justice-gold transition-colors cursor-pointer bg-white">
+                            <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="text-gray-700 font-medium mb-2">Drag and drop files here</p>
+                            <p class="text-sm text-gray-500 mb-4">or click to browse</p>
+                            <p class="text-xs text-gray-400">Accepts .txt and .pdf files</p>
+                            <input type="file" id="file-input" accept=".txt,.pdf" multiple class="hidden">
+                        </div>
+                        
+                        <!-- Upload Progress -->
+                        <div id="upload-progress" class="hidden mt-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span id="upload-filename" class="text-sm font-medium text-gray-700">Uploading...</span>
+                                    <span id="upload-percentage" class="text-sm text-gray-500">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="upload-bar" class="bg-justice-gold h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loading" class="hidden text-center py-8">
+                        <div class="inline-block w-12 h-12 border-4 border-gray-200 border-t-justice-gold rounded-full animate-spin"></div>
+                        <p class="mt-4 text-gray-600">Processing your request...</p>
+                    </div>
+
+                    <!-- Transcription Result -->
+                    <div id="transcription-result" class="hidden max-w-2xl mx-auto mb-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-10 h-10 bg-nyaya-blue rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-900">Transcription</h4>
+                            </div>
+                            <p id="transcription-text" class="text-gray-700 leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- Triage Result -->
+                    <div id="triage-result" class="hidden max-w-2xl mx-auto mb-6">
+                        <div class="bg-gradient-to-br from-nyaya-blue/5 to-justice-gold/5 rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-justice-gold rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-nyaya-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-900">Legal Analysis</h4>
+                            </div>
+                            <div id="triage-content" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: BNS Intelligence Panel -->
+                <div id="bns-panel" class="hidden w-96 bg-white rounded-xl shadow-lg border border-gray-200 p-6 slide-in-right" style="max-height: calc(100vh - 8rem); overflow-y: auto;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-nyaya-blue">BNS Intelligence</h3>
+                        <button onclick="closeBNSPanel()" class="p-1 hover:bg-gray-100 rounded">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Emotion & Urgency Summary -->
+                    <div class="mb-6 p-4 bg-gradient-to-r from-nyaya-blue/10 to-justice-gold/10 rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium text-gray-600">Emotional State</span>
+                            <div class="flex items-center space-x-2">
+                                <div id="bns-emotion-dot" class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <span id="bns-emotion-text" class="font-semibold text-gray-900">Angry</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-600">Urgency</span>
+                            <span id="bns-urgency-badge" class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">HIGH</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Legal Category -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-600 mb-2">Legal Category</h4>
+                        <div class="inline-block px-4 py-2 bg-nyaya-blue text-white rounded-lg font-semibold text-sm" id="bns-category">
+                            Property
+                        </div>
+                    </div>
+                    
+                    <!-- Detected Legal Sections -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-600 mb-3">Detected Legal Sections</h4>
+                        <div id="bns-sections-list" class="space-y-3">
+                            <!-- Section cards will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
+                        <button class="w-full px-4 py-3 bg-justice-gold text-nyaya-blue rounded-lg font-semibold hover:bg-justice-gold/90 transition-colors shadow-sm">
+                            Generate Petition
+                        </button>
+                        <button class="w-full px-4 py-3 border-2 border-nyaya-blue text-nyaya-blue rounded-lg font-semibold hover:bg-nyaya-blue hover:text-white transition-colors">
+                            Save to Cases
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Case Memory Page -->
+        <main id="page-case-memory" style="display: none;">
+            <div class="p-4 lg:p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">🗂️ Case History</h3>
+                    <p class="text-gray-600">Your previous voice triage searches and legal consultations</p>
+                </div>
+                
+                <!-- Loading State -->
+                <div id="cases-loading" class="text-center py-12">
+                    <div class="inline-block w-12 h-12 border-4 border-gray-200 border-t-justice-gold rounded-full animate-spin"></div>
+                    <p class="mt-4 text-gray-600">Loading cases...</p>
+                </div>
+                
+                <!-- Cases Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Case cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Verify Document Page -->
+        <main id="page-verify-document" style="display: none;">
+            <div class="p-4 lg:p-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">AI Document Verification</h3>
+                        <p class="text-gray-600">Upload your legal document and our AI will check for missing signatures, name mismatches, date errors, spelling mistakes, and other issues.</p>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
+                        <div id="verify-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-nyaya-blue transition-colors cursor-pointer">
+                            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Drop your document here</p>
+                            <p class="text-sm text-gray-500 mb-4">or click to browse</p>
+                            <p class="text-xs text-gray-400">Accepts PDF, DOCX, JPG, PNG, and TXT files</p>
+                            <input type="file" id="verify-file-input" accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,.txt" class="hidden">
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div id="verify-loading" class="hidden text-center py-8">
+                        <div class="inline-block w-12 h-12 border-4 border-gray-200 border-t-nyaya-blue rounded-full animate-spin"></div>
+                        <p class="mt-4 text-gray-600">Analyzing your document...</p>
+                    </div>
+
+                    <!-- Verification Results -->
+                    <div id="verify-results" class="hidden">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-nyaya-blue rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-gray-900">Verification Results</h4>
+                                    <p id="verify-filename" class="text-sm text-gray-600"></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Summary -->
+                            <div id="verify-summary" class="mb-6 p-4 rounded-lg"></div>
+                            
+                            <!-- Issues List -->
+                            <div id="verify-issues" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Legal Library Page -->
+        <main id="page-legal-library" style="display: none;">
+            <div class="p-4 lg:p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Legal Library</h3>
+                    <p class="text-gray-600">Browse BNS, BNSS, and CPC sections</p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                    <svg class="w-16 h-16 mx-auto text-justice-gold mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <h4 class="text-xl font-bold text-gray-900 mb-2">Coming Soon</h4>
+                    <p class="text-gray-600">Comprehensive legal reference library with searchable BNS sections</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod';
+        
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let useNativeScript = true; // Default to native script
+        
+        // Generate or retrieve unique userId from localStorage
+        let userId = localStorage.getItem('nyaya_userId');
+        if (!userId) {
+            userId = 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('nyaya_userId', userId);
+        }
+        console.log('User ID:', userId);
+
+        // SIMPLE PAGE NAVIGATION - INLINE STYLES ONLY
+        function showPage(pageId) {
+            console.log('showPage called with:', pageId);
+            
+            // Hide all pages using inline style only
+            var pages = ['page-dashboard', 'page-voice-triage', 'page-case-memory', 'page-legal-library', 'page-verify-document'];
+            for (var i = 0; i < pages.length; i++) {
+                var pageElement = document.getElementById(pages[i]);
+                if (pageElement) {
+                    pageElement.style.display = 'none';
+                }
+            }
+            
+            // Show target page using inline style only
+            var targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.style.display = 'block';
+                console.log('Showing page:', pageId);
+            } else {
+                console.error('Page not found:', pageId);
+            }
+            
+            // Update nav links
+            var navLinks = document.querySelectorAll('.nav-link');
+            for (var j = 0; j < navLinks.length; j++) {
+                var link = navLinks[j];
+                link.classList.remove('active', 'bg-justice-gold', 'text-nyaya-blue', 'shadow-lg');
+                link.classList.add('text-gray-300');
+            }
+            
+            // Find and activate the clicked link
+            for (var k = 0; k < navLinks.length; k++) {
+                var link = navLinks[k];
+                var onclick = link.getAttribute('onclick');
+                if (onclick && onclick.indexOf(pageId) !== -1) {
+                    link.classList.add('active', 'bg-justice-gold', 'text-nyaya-blue', 'shadow-lg');
+                    link.classList.remove('text-gray-300');
+                }
+            }
+            
+            // Update page title
+            var titles = {
+                'page-dashboard': 'Dashboard',
+                'page-voice-triage': 'Voice Triage',
+                'page-case-memory': 'Case History',
+                'page-legal-library': 'Legal Library',
+                'page-verify-document': 'Verify Document'
+            };
+            var titleElement = document.getElementById('page-title');
+            if (titleElement) {
+                titleElement.textContent = titles[pageId] || 'Nyaya-Dwarpal';
+            }
+            
+            // Fetch data when needed
+            if (pageId === 'page-case-memory') {
+                fetchCases(userId);
+            }
+            
+            if (pageId === 'page-dashboard') {
+                fetchRecentCases();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // Document Verification
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('verify-drop-zone');
+            const fileInput = document.getElementById('verify-file-input');
+            
+            if (dropZone && fileInput) {
+                dropZone.addEventListener('click', () => fileInput.click());
+                
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('border-nyaya-blue', 'bg-blue-50');
+                });
+                
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('border-nyaya-blue', 'bg-blue-50');
+                });
+                
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('border-nyaya-blue', 'bg-blue-50');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        verifyDocument(files[0]);
+                    }
+                });
+                
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        verifyDocument(e.target.files[0]);
+                    }
+                });
+            }
+        });
+
+        async function verifyDocument(file) {
+            console.log('Verifying document:', file.name);
+            
+            // Hide previous results
+            document.getElementById('verify-results').classList.add('hidden');
+            document.getElementById('verify-loading').classList.remove('hidden');
+            
+            try {
+                // Read file as base64
+                const base64 = await fileToBase64(file);
+                
+                // Send to API
+                const response = await fetch(`${API_ENDPOINT}/validate/document`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        document: base64.split(',')[1], // Remove data:...;base64, prefix
+                        fileType: file.name.split('.').pop().toLowerCase(),
+                        fileName: file.name
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Verification response:', data);
+                
+                if (data.success) {
+                    displayVerificationResults(data.data);
+                } else {
+                    throw new Error(data.error || 'Verification failed');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                alert('Failed to verify document: ' + error.message);
+                document.getElementById('verify-loading').classList.add('hidden');
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayVerificationResults(data) {
+            document.getElementById('verify-loading').classList.add('hidden');
+            document.getElementById('verify-results').classList.remove('hidden');
+            
+            // Set filename
+            document.getElementById('verify-filename').textContent = data.fileName;
+            
+            // Display summary
+            const summaryDiv = document.getElementById('verify-summary');
+            const severityColors = {
+                'HIGH': 'bg-red-50 border-red-200 text-red-800',
+                'MEDIUM': 'bg-amber-50 border-amber-200 text-amber-800',
+                'LOW': 'bg-green-50 border-green-200 text-green-800'
+            };
+            summaryDiv.className = `mb-6 p-4 rounded-lg border-2 ${severityColors[data.overallSeverity] || 'bg-gray-50 border-gray-200 text-gray-800'}`;
+            summaryDiv.innerHTML = `<p class="font-medium">${data.summary}</p>`;
+            
+            // Display issues
+            const issuesDiv = document.getElementById('verify-issues');
+            issuesDiv.innerHTML = '';
+            
+            if (data.issues && data.issues.length > 0) {
+                data.issues.forEach(issue => {
+                    const issueCard = document.createElement('div');
+                    const severityColor = {
+                        'HIGH': 'border-l-red-500 bg-red-50',
+                        'MEDIUM': 'border-l-amber-500 bg-amber-50',
+                        'LOW': 'border-l-green-500 bg-green-50'
+                    }[issue.severity] || 'border-l-gray-500 bg-gray-50';
+                    
+                    issueCard.className = `border-l-4 ${severityColor} rounded-lg p-4`;
+                    issueCard.innerHTML = `
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="text-xs font-bold uppercase ${issue.severity === 'HIGH' ? 'text-red-700' : issue.severity === 'MEDIUM' ? 'text-amber-700' : 'text-green-700'}">${issue.severity}</span>
+                            <span class="text-xs text-gray-600">${issue.type}</span>
+                        </div>
+                        <p class="font-medium text-gray-900 mb-1">${issue.description}</p>
+                        <p class="text-sm text-gray-600 mb-2"><strong>Location:</strong> ${issue.location}</p>
+                        <p class="text-sm text-gray-700"><strong>Suggestion:</strong> ${issue.suggestion}</p>
+                    `;
+                    issuesDiv.appendChild(issueCard);
+                });
+            } else {
+                issuesDiv.innerHTML = '<p class="text-center text-gray-600 py-8">✅ No issues found! Document looks good.</p>';
+            }
+        }
+
+        // Tab switching for input methods
+        function switchInputTab(tab) {
+            const voiceTab = document.getElementById('tab-voice');
+            const textTab = document.getElementById('tab-text');
+            const voiceSection = document.getElementById('voice-input-section');
+            const textSection = document.getElementById('text-input-section');
+            
+            if (tab === 'voice') {
+                voiceTab.classList.add('border-nyaya-blue', 'text-nyaya-blue');
+                voiceTab.classList.remove('border-transparent', 'text-gray-500');
+                textTab.classList.remove('border-nyaya-blue', 'text-nyaya-blue');
+                textTab.classList.add('border-transparent', 'text-gray-500');
+                voiceSection.classList.remove('hidden');
+                textSection.classList.add('hidden');
+            } else {
+                textTab.classList.add('border-nyaya-blue', 'text-nyaya-blue');
+                textTab.classList.remove('border-transparent', 'text-gray-500');
+                voiceTab.classList.remove('border-nyaya-blue', 'text-nyaya-blue');
+                voiceTab.classList.add('border-transparent', 'text-gray-500');
+                textSection.classList.remove('hidden');
+                voiceSection.classList.add('hidden');
+            }
+        }
+
+        // Toggle script preference
+        function toggleScript() {
+            useNativeScript = !useNativeScript;
+            const toggle = document.getElementById('script-toggle');
+            const dot = document.getElementById('script-toggle-dot');
+            const label = document.getElementById('script-label');
+            
+            if (useNativeScript) {
+                toggle.classList.add('bg-nyaya-blue');
+                toggle.classList.remove('bg-gray-300');
+                dot.classList.add('translate-x-6');
+                dot.classList.remove('translate-x-1');
+                label.textContent = 'Native Script';
+            } else {
+                toggle.classList.remove('bg-nyaya-blue');
+                toggle.classList.add('bg-gray-300');
+                dot.classList.remove('translate-x-6');
+                dot.classList.add('translate-x-1');
+                label.textContent = 'Roman Letters';
+            }
+        }
+
+        // Analyze text issue
+        async function analyzeTextIssue() {
+            const textIssue = document.getElementById('text-issue').value.trim();
+            const language = document.getElementById('text-language').value;
+            
+            if (!textIssue) {
+                alert('Please describe your legal issue');
+                return;
+            }
+            
+            // Hide previous results
+            document.getElementById('transcription-result').classList.add('hidden');
+            document.getElementById('triage-result').classList.add('hidden');
+            
+            // Show loading
+            document.getElementById('loading').classList.remove('hidden');
+            
+            try {
+                // Show transcription (the typed text)
+                document.getElementById('transcription-result').classList.remove('hidden');
+                document.getElementById('transcription-text').textContent = textIssue;
+                
+                // Send to API
+                await sendToAPI(textIssue, language);
+            } catch (error) {
+                console.error('Error analyzing text:', error);
+                alert('Failed to analyze your issue. Please try again.');
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // Microphone recording
+        function toggleRecording() {
+            console.log('=== toggleRecording called ===');
+            console.log('isRecording:', isRecording);
+            console.log('mediaRecorder:', mediaRecorder);
+            
+            if (!isRecording) {
+                console.log('Calling startRecording...');
+                startRecording();
+            } else {
+                console.log('Calling stopRecording...');
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            console.log('=== startRecording called ===');
+            
+            // Hide previous results when starting new recording
+            document.getElementById('transcription-result').classList.add('hidden');
+            document.getElementById('triage-result').classList.add('hidden');
+            
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                    console.log('✓ Microphone access granted');
+                    console.log('Stream:', stream);
+                    
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    console.log('✓ MediaRecorder created');
+
+                    mediaRecorder.ondataavailable = function(event) {
+                        console.log('Audio data available, size:', event.data.size);
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = function() {
+                        console.log('Recording stopped, total chunks:', audioChunks.length);
+                        var audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        console.log('Audio blob created, size:', audioBlob.size);
+                        processAudio(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    console.log('✓ MediaRecorder started, isRecording:', isRecording);
+
+                    // Update UI - hide pulse ring, show waveform
+                    var pulseRing = document.getElementById('pulse-ring');
+                    var waveformRing = document.getElementById('waveform-ring');
+                    var micStatus = document.getElementById('mic-status');
+                    var micButton = document.getElementById('mic-button');
+                    
+                    console.log('UI elements:', {
+                        pulseRing: pulseRing,
+                        waveformRing: waveformRing,
+                        micStatus: micStatus,
+                        micButton: micButton
+                    });
+                    
+                    if (pulseRing) pulseRing.classList.add('hidden');
+                    if (waveformRing) waveformRing.classList.remove('hidden');
+                    if (micStatus) micStatus.textContent = 'Recording... Click to stop';
+                    if (micButton) micButton.classList.add('bg-red-500');
+                    
+                    console.log('✓ UI updated');
+                })
+                .catch(function(error) {
+                    console.error('✗ Error accessing microphone:', error);
+                    console.error('Error name:', error.name);
+                    console.error('Error message:', error.message);
+                    alert('Microphone error: ' + error.message);
+                });
+        }
+
+        function stopRecording() {
+            console.log('Stopping recording...');
+            
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                console.log('MediaRecorder stopped');
+
+                // Update UI
+                document.getElementById('pulse-ring').classList.remove('hidden');
+                document.getElementById('waveform-ring').classList.add('hidden');
+                document.getElementById('mic-status').textContent = 'Processing...';
+                document.getElementById('loading').classList.remove('hidden');
+            }
+        }
+
+        // Process audio with backend transcribe endpoint
+        async function processAudio(audioBlob) {
+            console.log('Processing audio blob, size:', audioBlob.size);
+            
+            try {
+                // Validate audio blob
+                if (!audioBlob || audioBlob.size === 0) {
+                    throw new Error('No audio recorded');
+                }
+                
+                // Convert audio blob to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                
+                reader.onloadend = async function() {
+                    try {
+                        // Extract base64 data (remove data:audio/webm;base64, prefix)
+                        const base64Audio = reader.result.split(',')[1];
+                        
+                        console.log('Calling backend transcribe API...');
+                        
+                        // Call backend transcribe endpoint
+                        const transcribeResponse = await fetch(`${API_ENDPOINT}/transcribe`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                audio: base64Audio,
+                                language_code: (document.getElementById('ui-language') ? document.getElementById('ui-language').value + '-IN' : 'en-IN')
+                            })
+                        });
+
+                        if (!transcribeResponse.ok) {
+                            const errorData = await transcribeResponse.json();
+                            console.error('Transcription API error:', errorData);
+                            throw new Error(errorData.error || 'Transcription failed');
+                        }
+
+                        const transcribeData = await transcribeResponse.json();
+                        console.log('Transcription response:', transcribeData);
+                        
+                        if (!transcribeData.success) {
+                            throw new Error(transcribeData.error || 'Transcription failed');
+                        }
+                        
+                        const transcription = transcribeData.data.transcript;
+                        const detectedLanguage = transcribeData.data.language_code || 'en-IN';
+                        
+                        // Convert language_code to simple language code (e.g., 'en-IN' -> 'en', 'hi-IN' -> 'hi')
+                        const languageCode = detectedLanguage.split('-')[0];
+                        
+                        console.log('Detected language:', detectedLanguage, '-> Using:', languageCode);
+                        
+                        // Validate transcription
+                        if (!transcription || transcription.trim() === '') {
+                            console.warn('Empty transcription received');
+                            alert('No speech detected. Please try again.');
+                            resetUI();
+                            return;
+                        }
+                        
+                        console.log('Transcription received:', transcription);
+
+                        // Show transcription on the page
+                        document.getElementById('transcription-result').classList.remove('hidden');
+                        document.getElementById('transcription-text').textContent = transcription;
+
+                        // Send transcription to Voice Triage API with detected language
+                        await sendToAPI(transcription, languageCode);
+                        
+                    } catch (error) {
+                        console.error('Error in transcription:', error);
+                        alert('Microphone recording failed. Please check your browser permissions and try again.');
+                        resetUI();
+                    }
+                };
+                
+                reader.onerror = function(error) {
+                    console.error('FileReader error:', error);
+                    alert('Failed to process audio. Please try again.');
+                    resetUI();
+                };
+                
+            } catch (error) {
+                console.error('Error processing audio:', error);
+                alert('Microphone recording failed. Please check your browser permissions and try again.');
+                resetUI();
+            }
+        }
+
+        async function sendToAPI(transcription, language = 'en') {
+            console.log('Sending to API, transcription:', transcription);
+            console.log('Language parameter:', language);
+            
+            // Validate transcription before sending
+            if (!transcription || transcription.trim() === '') {
+                console.error('Cannot send empty transcription to API');
+                alert('No speech detected. Please try again.');
+                resetUI();
+                return;
+            }
+            
+            try {
+                console.log('Making API request with:', {
+                    userId: userId,
+                    language: language,
+                    useNativeScript: useNativeScript,
+                    transcriptionLength: transcription.length
+                });
+                
+                const response = await fetch(`${API_ENDPOINT}/voice/triage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        transcribedText: transcription,
+                        language: language,
+                        useNativeScript: useNativeScript
+                    })
+                });
+
+                const data = await response.json();
+                console.log('API response:', data);
+                console.log('API response data:', data.data);
+                console.log('Classification:', data.data?.classification);
+                console.log('Category:', data.data?.classification?.category);
+                console.log('Recommendation:', data.data?.recommendation);
+                console.log('Next Steps:', data.data?.nextSteps);
+                console.log('Required Documents:', data.data?.requiredDocuments);
+                
+                if (data.success) {
+                    setTimeout(() => displayResults(data.data), 100);
+                } else {
+                    throw new Error(data.error || 'API request failed');
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                alert('Error processing your request. Please try again.');
+                resetUI();
+            }
+        }
+
+        function displayResults(data) {
+            console.log('displayResults called with data:', data);
+            console.log('Category from data:', data?.classification?.category);
+            console.log('Urgency from data:', data?.emotion?.urgency);
+            console.log('Recommendation from data:', data?.recommendation);
+            console.log('Next Steps from data:', data?.nextSteps);
+            console.log('Required Documents from data:', data?.requiredDocuments);
+            
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('mic-status').textContent = 'Analysis Complete';
+            
+            // Show triage results on the page
+            document.getElementById('triage-result').classList.remove('hidden');
+            
+            const triageContent = document.getElementById('triage-content');
+            triageContent.innerHTML = '';
+            
+            // Category
+            if (data.classification && data.classification.category) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
+                categoryDiv.innerHTML = `
+                    <p class="text-sm font-medium text-gray-600 mb-1">Legal Category</p>
+                    <p class="text-lg font-bold text-nyaya-blue">${data.classification.category}</p>
+                `;
+                triageContent.appendChild(categoryDiv);
+            }
+            
+            // Urgency
+            if (data.emotion && data.emotion.urgency) {
+                const urgencyDiv = document.createElement('div');
+                urgencyDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
+                const urgencyColors = {
+                    high: 'text-red-600 bg-red-50',
+                    medium: 'text-yellow-600 bg-yellow-50',
+                    low: 'text-green-600 bg-green-50'
+                };
+                const urgencyClass = urgencyColors[data.emotion.urgency.toLowerCase()] || 'text-gray-600 bg-gray-50';
+                urgencyDiv.innerHTML = `
+                    <p class="text-sm font-medium text-gray-600 mb-1">Urgency Level</p>
+                    <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${urgencyClass}">${data.emotion.urgency.toUpperCase()}</span>
+                `;
+                triageContent.appendChild(urgencyDiv);
+            }
+            
+            // Emotional State
+            if (data.emotion && data.emotion.primary) {
+                const emotionDiv = document.createElement('div');
+                emotionDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
+                emotionDiv.innerHTML = `
+                    <p class="text-sm font-medium text-gray-600 mb-1">Emotional State</p>
+                    <p class="text-lg font-semibold text-gray-900">${data.emotion.primary.charAt(0).toUpperCase() + data.emotion.primary.slice(1)}</p>
+                `;
+                triageContent.appendChild(emotionDiv);
+            }
+            
+            // Relevant Sections
+            if (data.classification && data.classification.relevantSections && data.classification.relevantSections.length > 0) {
+                const sectionsDiv = document.createElement('div');
+                sectionsDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
+                sectionsDiv.innerHTML = '<p class="text-sm font-medium text-gray-600 mb-3">Relevant Legal Sections</p>';
+                
+                const sectionsList = document.createElement('div');
+                sectionsList.className = 'space-y-3';
+                
+                data.classification.relevantSections.forEach(section => {
+                    const sectionCard = document.createElement('div');
+                    sectionCard.className = 'bg-gradient-to-r from-nyaya-blue/5 to-justice-gold/5 rounded-lg p-3 border border-gray-100';
+                    sectionCard.innerHTML = `
+                        <p class="text-sm font-bold text-nyaya-blue mb-1">${section.section || 'BNS Section'}</p>
+                        <p class="text-xs text-gray-600 mb-1">${section.act || 'Bharatiya Nyaya Sanhita'}</p>
+                        <p class="text-sm text-gray-700">${section.description || 'Relevant legal provision for your case'}</p>
+                    `;
+                    sectionsList.appendChild(sectionCard);
+                });
+                
+                sectionsDiv.appendChild(sectionsList);
+                triageContent.appendChild(sectionsDiv);
+            }
+            
+            // Recommendation
+            if (data.recommendation) {
+                const recommendationDiv = document.createElement('div');
+                recommendationDiv.className = 'bg-justice-gold/10 rounded-lg p-4 border border-justice-gold/30';
+                recommendationDiv.innerHTML = `
+                    <p class="text-sm font-medium text-gray-600 mb-2">Recommended Action</p>
+                    <p class="text-gray-800 leading-relaxed">${data.recommendation.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>")}</p>
+                `;
+                triageContent.appendChild(recommendationDiv);
+            }
+            
+            // Next Steps
+            if (data.nextSteps && data.nextSteps.length > 0) {
+                const nextStepsDiv = document.createElement('div');
+                nextStepsDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
+                nextStepsDiv.innerHTML = '<p class="text-sm font-medium text-gray-600 mb-3">Next Steps</p>';
+                
+                const stepsList = document.createElement('ol');
+                stepsList.className = 'list-decimal list-inside space-y-2';
+                
+                data.nextSteps.forEach(step => {
+                    const stepItem = document.createElement('li');
+                    stepItem.className = 'text-sm text-gray-700';
+                    stepItem.textContent = step;
+                    stepsList.appendChild(stepItem);
+                });
+                
+                nextStepsDiv.appendChild(stepsList);
+                triageContent.appendChild(nextStepsDiv);
+            }
+            
+            // Required Documents
+            if (data.requiredDocuments && data.requiredDocuments.length > 0) {
+                const docsDiv = document.createElement('div');
+                docsDiv.className = 'bg-blue-50 rounded-lg p-4 border border-blue-200';
+                docsDiv.innerHTML = '<p class="text-sm font-medium text-gray-700 mb-3">✅ Required Documents</p>';
+                
+                const docsList = document.createElement('ul');
+                docsList.className = 'space-y-2';
+                
+                data.requiredDocuments.forEach(doc => {
+                    const docItem = document.createElement('li');
+                    docItem.className = 'text-sm text-gray-700 flex items-start';
+                    docItem.innerHTML = `<span class="mr-2">✅</span><span>${doc}</span>`;
+                    docsList.appendChild(docItem);
+                });
+                
+                docsDiv.appendChild(docsList);
+                triageContent.appendChild(docsDiv);
+            }
+            
+            // Cost and Timeline
+            if (data.estimatedCost || data.timeline) {
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
+                
+                if (data.estimatedCost) {
+                    const costDiv = document.createElement('div');
+                    costDiv.className = 'mb-4';
+                    costDiv.innerHTML = '<p class="text-sm font-medium text-gray-600 mb-2">Estimated Cost</p>';
+                    
+                    const costList = document.createElement('ul');
+                    costList.className = 'list-disc list-inside space-y-1';
+                    
+                    // Split by comma and create bullet points
+                    const costItems = data.estimatedCost.split(/,(?![0-9])/).map(item => item.trim());
+                    costItems.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'text-sm text-gray-800';
+                        li.textContent = item;
+                        costList.appendChild(li);
+                    });
+                    
+                    costDiv.appendChild(costList);
+                    infoDiv.appendChild(costDiv);
+                }
+                
+                if (data.timeline) {
+                    const timelineDiv = document.createElement('div');
+                    timelineDiv.innerHTML = '<p class="text-sm font-medium text-gray-600 mb-2">Expected Timeline</p>';
+                    
+                    const timelineList = document.createElement('ul');
+                    timelineList.className = 'list-disc list-inside space-y-1';
+                    
+                    // Split by comma and create bullet points
+                    const timelineItems = data.timeline.split(',').map(item => item.trim());
+                    timelineItems.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'text-sm text-gray-800';
+                        li.textContent = item;
+                        timelineList.appendChild(li);
+                    });
+                    
+                    timelineDiv.appendChild(timelineList);
+                    infoDiv.appendChild(timelineDiv);
+                }
+                
+                triageContent.appendChild(infoDiv);
+            }
+            
+            // Resources
+            if (data.resources && data.resources.length > 0) {
+                const resourcesDiv = document.createElement('div');
+                resourcesDiv.className = 'bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200';
+                resourcesDiv.innerHTML = '<p class="text-sm font-medium text-gray-600 mb-3">Free Resources & Help</p>';
+                
+                const resourcesList = document.createElement('div');
+                resourcesList.className = 'space-y-3';
+                
+                data.resources.forEach(resource => {
+                    const resourceCard = document.createElement('div');
+                    resourceCard.className = 'bg-white rounded-lg p-3 border border-gray-100';
+                    resourceCard.innerHTML = `
+                        <p class="text-sm font-bold text-green-700 mb-1">${resource.name}</p>
+                        <p class="text-xs text-gray-700 mb-1">${resource.action}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-xs font-medium text-green-600">${resource.cost}</span>
+                            ${resource.timeline ? `<span class="text-xs text-gray-500">${resource.timeline}</span>` : ''}
+                        </div>
+                    `;
+                    resourcesList.appendChild(resourceCard);
+                });
+                
+                resourcesDiv.appendChild(resourcesList);
+                triageContent.appendChild(resourcesDiv);
+            }
+            
+            // Legal Disclaimer
+            if (data.legalDisclaimer) {
+                const disclaimerDiv = document.createElement('div');
+                disclaimerDiv.className = 'bg-amber-50 rounded-lg p-4 border-2 border-amber-400 shadow-sm mt-4';
+                disclaimerDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3 flex-shrink-0">⚠️</span>
+                        <div>
+                            <p class="text-sm font-bold text-amber-900 mb-1">Important Legal Disclaimer</p>
+                            <p class="text-sm text-amber-800">${data.legalDisclaimer}</p>
+                        </div>
+                    </div>
+                `;
+                triageContent.appendChild(disclaimerDiv);
+            }
+            
+            // Update BNS panel (keep existing functionality)
+            const emotionColors = {
+                angry: 'bg-red-500',
+                distressed: 'bg-orange-500',
+                confused: 'bg-purple-500',
+                calm: 'bg-green-500'
+            };
+            if (data.emotion && data.emotion.primary) {
+                document.getElementById('bns-emotion-dot').className = `w-3 h-3 rounded-full ${emotionColors[data.emotion.primary] || 'bg-gray-500'}`;
+                document.getElementById('bns-emotion-text').textContent = data.emotion.primary.charAt(0).toUpperCase() + data.emotion.primary.slice(1);
+            }
+
+            // Update urgency in BNS panel
+            if (data.emotion && data.emotion.urgency) {
+                const urgencyColors = {
+                    high: 'bg-red-100 text-red-800',
+                    medium: 'bg-yellow-100 text-yellow-800',
+                    low: 'bg-green-100 text-green-800'
+                };
+                document.getElementById('bns-urgency-badge').className = `px-3 py-1 rounded-full text-xs font-bold ${urgencyColors[data.emotion.urgency] || 'bg-gray-100 text-gray-800'}`;
+                document.getElementById('bns-urgency-badge').textContent = data.emotion.urgency.toUpperCase();
+            }
+
+            // Update category in BNS panel
+            if (data.classification && data.classification.category) {
+                document.getElementById('bns-category').textContent = data.classification.category;
+            }
+
+            // Update sections in BNS panel
+            const sectionsList = document.getElementById('bns-sections-list');
+            sectionsList.innerHTML = '';
+            
+            if (data.classification && data.classification.relevantSections && data.classification.relevantSections.length > 0) {
+                data.classification.relevantSections.forEach(section => {
+                    const sectionCard = document.createElement('div');
+                    sectionCard.className = 'bg-gradient-to-r from-nyaya-blue/5 to-justice-gold/5 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow';
+                    sectionCard.innerHTML = `
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-10 h-10 bg-justice-gold rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-nyaya-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-nyaya-blue mb-1">${section.section || 'BNS Section'}</p>
+                                <p class="text-xs text-gray-600 mb-2">${section.act || 'Bharatiya Nyaya Sanhita'}</p>
+                                <p class="text-sm text-gray-700">${section.description || 'Relevant legal provision for your case'}</p>
+                            </div>
+                        </div>
+                    `;
+                    sectionsList.appendChild(sectionCard);
+                });
+            } else {
+                sectionsList.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No specific sections identified</p>';
+            }
+
+            // Don't show BNS panel automatically - results are now on the main page
+            // document.getElementById('bns-panel').classList.remove('hidden');
+            
+            // Reset mic button
+            setTimeout(() => {
+                document.getElementById('mic-status').textContent = 'Click to Start Recording';
+                document.getElementById('mic-button').classList.remove('bg-red-500');
+            }, 2000);
+        }
+
+        function closeBNSPanel() {
+            document.getElementById('bns-panel').classList.add('hidden');
+        }
+
+        function resetUI() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('mic-status').textContent = 'Click to Start Recording';
+            document.getElementById('mic-button').classList.remove('bg-red-500');
+            document.getElementById('pulse-ring').classList.remove('hidden');
+            document.getElementById('waveform-ring').classList.add('hidden');
+            
+            // Hide results when starting new recording
+            document.getElementById('transcription-result').classList.add('hidden');
+            document.getElementById('triage-result').classList.add('hidden');
+        }
+
+        // Document upload functionality
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            const validTypes = ['text/plain', 'application/pdf'];
+            
+            if (!validTypes.includes(file.type)) {
+                alert('Please upload only .txt or .pdf files');
+                return;
+            }
+
+            uploadToS3AndTranslate(file);
+        }
+
+        async function uploadToS3AndTranslate(file) {
+            try {
+                // Show progress bar
+                document.getElementById('upload-progress').classList.remove('hidden');
+                document.getElementById('upload-filename').textContent = file.name;
+                document.getElementById('upload-percentage').textContent = 'Reading file...';
+
+                // Read file as base64
+                const fileContent = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+
+                // Update progress
+                document.getElementById('upload-percentage').textContent = 'Translating...';
+                document.getElementById('upload-bar').style.width = '50%';
+
+                // Call translation API with base64 file content directly
+                const translationResult = await translateDocumentDirect(fileContent, file.name);
+                
+                // Update progress to complete
+                document.getElementById('upload-bar').style.width = '100%';
+                document.getElementById('upload-percentage').textContent = 'Complete!';
+                
+                // Display translation results
+                setTimeout(() => {
+                    document.getElementById('upload-progress').classList.add('hidden');
+                    document.getElementById('upload-bar').style.width = '0%';
+                    displayTranslationResults(translationResult);
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Upload/Translation Error:', error);
+                document.getElementById('upload-progress').classList.add('hidden');
+                document.getElementById('upload-bar').style.width = '0%';
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function uploadFileToS3(file) {
+            // S3 bucket configuration
+            const BUCKET_NAME = 'nyayadwarpalstack-nyayadocbucketv24eb39526-yskr4fmijdf4';
+            const REGION = 'ap-south-2';
+            
+            // Generate unique filename
+            const timestamp = Date.now();
+            const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const s3Key = `documents/${timestamp}_${sanitizedFilename}`;
+            
+            try {
+                // For browser-based S3 upload, we need AWS SDK
+                // Since we can't use AWS SDK directly in browser without credentials,
+                // we'll use a simple PUT request approach
+                
+                // Read file as ArrayBuffer
+                const fileContent = await file.arrayBuffer();
+                
+                // Create FormData for multipart upload (alternative approach)
+                // Note: In production, you should get a pre-signed URL from your backend
+                // For now, we'll simulate the upload and use the S3 key
+                
+                console.log(`Uploading ${file.name} to S3 key: ${s3Key}`);
+                
+                // Simulate upload progress
+                let progress = 0;
+                const uploadInterval = setInterval(() => {
+                    progress += 20;
+                    if (progress <= 100) {
+                        document.getElementById('upload-bar').style.width = (progress / 2) + '%';
+                    } else {
+                        clearInterval(uploadInterval);
+                    }
+                }, 200);
+                
+                // In a real implementation, you would:
+                // 1. Call your backend to get a pre-signed S3 URL
+                // 2. Upload the file to that URL
+                // For demo, we'll use the AWS CLI approach or assume file is already uploaded
+                
+                // Wait for simulated upload
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                clearInterval(uploadInterval);
+                
+                return s3Key;
+                
+            } catch (error) {
+                console.error('S3 Upload Error:', error);
+                throw new Error('Failed to upload file to S3');
+            }
+        }
+
+        async function translateDocumentDirect(fileContent, filename) {
+            try {
+                const targetLang = document.getElementById('target-language')?.value || 'hi';
+                const response = await fetch(`${API_ENDPOINT}/translate/document`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileContent: fileContent,
+                        filename: filename,
+                        sourceLanguage: 'en',
+                        targetLanguage: targetLang,
+                        userId: 'user_' + Date.now()
+                    })
+                });
+                if (!response.ok) throw new Error(`Translation failed: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('Translation error:', error);
+                throw error;
+            }
+        }
+
+        async function translateDocument(s3Key, filename) {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/translate/document`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 'user-001',
+                        s3Key: s3Key,
+                        sourceLanguage: 'en',
+                        targetLanguage: 'hi',
+                        documentType: 'Legal Notice'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    return data.data;
+                } else {
+                    throw new Error(data.error || 'Translation failed');
+                }
+            } catch (error) {
+                console.error('Translation API Error:', error);
+                throw error;
+            }
+        }
+
+        function displayTranslationResults(data) {
+            // Create a results modal or section
+            const resultsHTML = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="translation-modal">
+                    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div class="bg-gradient-to-r from-nyaya-blue to-justice-gold p-6">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-2xl font-bold text-white">Translation Complete</h3>
+                                <button onclick="closeTranslationModal()" class="text-white hover:text-gray-200">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 space-y-6">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Original Text (English)</h4>
+                                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">${data.originalText}</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Translated Text (Hindi)</h4>
+                                <div class="p-4 bg-gradient-to-r from-nyaya-blue/5 to-justice-gold/5 rounded-lg border border-justice-gold max-h-48 overflow-y-auto">
+                                    <p class="text-sm text-gray-900 whitespace-pre-wrap">${data.translatedText}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 pt-4 border-t border-gray-200">
+                                <a href="${data.downloadUrl}" target="_blank" class="flex-1 px-6 py-3 bg-justice-gold text-nyaya-blue rounded-lg font-semibold hover:bg-justice-gold/90 transition-colors text-center">
+                                    Download Translation
+                                </a>
+                                <button onclick="closeTranslationModal()" class="flex-1 px-6 py-3 border-2 border-nyaya-blue text-nyaya-blue rounded-lg font-semibold hover:bg-nyaya-blue hover:text-white transition-colors">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', resultsHTML);
+        }
+
+        function closeTranslationModal() {
+            const modal = document.getElementById('translation-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Case Memory functionality
+        async function fetchCases(userId = 'all', limit = 50) {
+            try {
+                const url = `${API_ENDPOINT}/cases?userId=${userId}&limit=${limit}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success && data.data.cases) {
+                    displayCases(data.data.cases);
+                } else {
+                    throw new Error(data.error || 'Failed to fetch cases');
+                }
+            } catch (error) {
+                console.error('Error fetching cases:', error);
+                displayCasesError(error.message);
+            }
+        }
+
+        function displayCases(cases) {
+            const caseMemoryPage = document.getElementById('page-case-memory');
+            const container = caseMemoryPage.querySelector('.grid');
+            const loadingElement = document.getElementById('cases-loading');
+            
+            // Hide loading spinner
+            if (loadingElement) {
+                loadingElement.classList.add('hidden');
+            }
+            
+            if (!cases || cases.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <p class="text-gray-600 font-medium">No cases found</p>
+                        <p class="text-sm text-gray-500 mt-2">Start by using Voice Triage to create your first case</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            cases.forEach(caseData => {
+                const emotionBadges = {
+                    angry: { class: 'bg-red-100 text-red-800', label: 'ANGRY' },
+                    distressed: { class: 'bg-orange-100 text-orange-800', label: 'DISTRESSED' },
+                    confused: { class: 'bg-purple-100 text-purple-800', label: 'CONFUSED' },
+                    calm: { class: 'bg-green-100 text-green-800', label: 'CALM' }
+                };
+                
+                const emotion = caseData.emotion?.primary || 'calm';
+                const badge = emotionBadges[emotion] || emotionBadges.calm;
+                
+                // Format date
+                const date = new Date(caseData.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const caseCard = document.createElement('div');
+                caseCard.className = 'bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow';
+                caseCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Case ID</p>
+                            <p class="font-semibold text-gray-900">${caseData.caseId.substring(0, 12)}...</p>
+                        </div>
+                        <span class="px-3 py-1 ${badge.class} rounded-full text-xs font-bold">${badge.label}</span>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-500">Date</p>
+                        <p class="text-gray-900">${formattedDate}</p>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-500 mb-2">Category</p>
+                        <span class="inline-block px-3 py-1 bg-nyaya-blue/10 text-nyaya-blue rounded-lg text-sm font-medium">${caseData.category}</span>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-500 mb-2">Issue</p>
+                        <p class="text-sm text-gray-700 line-clamp-2">${caseData.issueSummary}</p>
+                    </div>
+                    <button onclick='viewCaseDetails(${JSON.stringify(caseData).replace(/'/g, "&apos;")})' class="w-full px-4 py-2 bg-justice-gold text-nyaya-blue rounded-lg font-semibold hover:bg-justice-gold/90 transition-colors">
+                        View Details
+                    </button>
+                `;
+                
+                container.appendChild(caseCard);
+            });
+        }
+
+        function displayCasesError(errorMessage) {
+            const caseMemoryPage = document.getElementById('page-case-memory');
+            const container = caseMemoryPage.querySelector('.grid');
+            const loadingElement = document.getElementById('cases-loading');
+            
+            // Hide loading spinner
+            if (loadingElement) {
+                loadingElement.classList.add('hidden');
+            }
+            
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <svg class="w-16 h-16 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-gray-900 font-medium mb-2">Error Loading Cases</p>
+                    <p class="text-sm text-gray-600">${errorMessage}</p>
+                    <button onclick="fetchCases(userId)" class="mt-4 px-6 py-2 bg-justice-gold text-nyaya-blue rounded-lg font-semibold hover:bg-justice-gold/90 transition-colors">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+
+        function viewCaseDetails(caseData) {
+            const modalHTML = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" id="case-details-modal">
+                    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div class="bg-gradient-to-r from-nyaya-blue to-justice-gold p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-white">Case Details</h3>
+                                    <p class="text-white/80 text-sm mt-1">Case ID: ${caseData.caseId || 'Unknown'}</p>
+                                </div>
+                                <button onclick="closeCaseDetailsModal()" class="text-white hover:text-gray-200">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 space-y-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">User ID</p>
+                                    <p class="font-semibold text-gray-900">${caseData.userId || 'Unknown'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">Date</p>
+                                    <p class="font-semibold text-gray-900">${caseData.date ? new Date(caseData.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Unknown'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">Emotion</p>
+                                    <p class="font-semibold text-gray-900">${caseData.emotion?.primary || 'calm'} (${caseData.emotion?.urgency || 'medium'} urgency)</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">Category</p>
+                                    <p class="font-semibold text-gray-900">${caseData.category || 'Other'}</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Full Transcription</h4>
+                                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">${caseData.fullTranscription || caseData.issueSummary || 'No transcription available'}</p>
+                                </div>
+                            </div>
+                            
+                            ${caseData.extractedFacts && Object.keys(caseData.extractedFacts).length > 0 ? `
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Extracted Facts</h4>
+                                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
+                                    ${caseData.extractedFacts.who ? `<p class="text-sm"><span class="font-semibold text-gray-900">Who:</span> <span class="text-gray-700">${Array.isArray(caseData.extractedFacts.who) ? caseData.extractedFacts.who.join(', ') : caseData.extractedFacts.who}</span></p>` : ''}
+                                    ${caseData.extractedFacts.what ? `<p class="text-sm"><span class="font-semibold text-gray-900">What:</span> <span class="text-gray-700">${caseData.extractedFacts.what}</span></p>` : ''}
+                                    ${caseData.extractedFacts.when ? `<p class="text-sm"><span class="font-semibold text-gray-900">When:</span> <span class="text-gray-700">${caseData.extractedFacts.when}</span></p>` : ''}
+                                    ${caseData.extractedFacts.where ? `<p class="text-sm"><span class="font-semibold text-gray-900">Where:</span> <span class="text-gray-700">${caseData.extractedFacts.where}</span></p>` : ''}
+                                    ${caseData.extractedFacts.why ? `<p class="text-sm"><span class="font-semibold text-gray-900">Why:</span> <span class="text-gray-700">${caseData.extractedFacts.why}</span></p>` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${caseData.relevantSections && caseData.relevantSections.length > 0 ? `
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Relevant Legal Sections</h4>
+                                <div class="space-y-2">
+                                    ${caseData.relevantSections.map(section => `
+                                        <div class="p-3 bg-gradient-to-r from-nyaya-blue/5 to-justice-gold/5 rounded-lg border border-gray-200">
+                                            <p class="font-semibold text-nyaya-blue text-sm">${section.act || 'Act'} - ${section.section || 'Section'}</p>
+                                            <p class="text-xs text-gray-600 mt-1">${section.description || 'No description'}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="flex gap-3 pt-4 border-t border-gray-200">
+                                <button onclick="generatePetitionFromCase('${caseData.caseId}')" class="flex-1 px-6 py-3 bg-justice-gold text-nyaya-blue rounded-lg font-semibold hover:bg-justice-gold/90 transition-colors">
+                                    Generate Petition
+                                </button>
+                                <button onclick="closeCaseDetailsModal()" class="flex-1 px-6 py-3 border-2 border-nyaya-blue text-nyaya-blue rounded-lg font-semibold hover:bg-nyaya-blue hover:text-white transition-colors">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function closeCaseDetailsModal() {
+            const modal = document.getElementById('case-details-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function generatePetitionFromCase(caseId) {
+            // TODO: Implement petition generation from case
+            alert(`Petition generation for case ${caseId} will be implemented soon`);
+            closeCaseDetailsModal();
+        }
+
+        // Dashboard Recent Cases functionality
+        async function fetchRecentCases() {
+            try {
+                const url = `${API_ENDPOINT}/cases?userId=${userId}&limit=3`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Hide loading
+                document.getElementById('recent-activity-loading').classList.add('hidden');
+                
+                if (data.success && data.data.cases && data.data.cases.length > 0) {
+                    // Update stats
+                    document.getElementById('total-cases-stat').textContent = data.data.cases.length;
+                    
+                    // Display recent cases
+                    displayRecentCases(data.data.cases);
+                } else {
+                    // Show empty state
+                    document.getElementById('recent-activity-empty').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching recent cases:', error);
+                document.getElementById('recent-activity-loading').classList.add('hidden');
+                document.getElementById('recent-activity-empty').classList.remove('hidden');
+            }
+        }
+
+        function displayRecentCases(cases) {
+            const container = document.getElementById('recent-activity-container');
+            container.classList.remove('hidden');
+            container.innerHTML = '';
+            
+            const emotionBadges = {
+                angry: { class: 'bg-red-100 text-red-800', label: 'ANGRY' },
+                distressed: { class: 'bg-orange-100 text-orange-800', label: 'DISTRESSED' },
+                confused: { class: 'bg-purple-100 text-purple-800', label: 'CONFUSED' },
+                calm: { class: 'bg-green-100 text-green-800', label: 'CALM' }
+            };
+            
+            cases.slice(0, 3).forEach(caseData => {
+                const emotion = caseData.emotion?.primary || 'calm';
+                const badge = emotionBadges[emotion] || emotionBadges.calm;
+                
+                const date = new Date(caseData.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                const caseCard = document.createElement('div');
+                caseCard.className = 'bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow';
+                caseCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="px-3 py-1 ${badge.class} rounded-full text-xs font-bold">${badge.label}</span>
+                        <span class="text-sm text-gray-500">${formattedDate}</span>
+                    </div>
+                    <div class="mb-3">
+                        <span class="inline-block px-3 py-1 bg-nyaya-blue/10 text-nyaya-blue rounded-lg text-sm font-medium">${caseData.category}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-3 mb-4">${caseData.issueSummary}</p>
+                    <button onclick='viewCaseDetails(${JSON.stringify(caseData).replace(/'/g, "&apos;")})' class="w-full px-4 py-2 bg-justice-gold text-nyaya-blue rounded-lg font-semibold hover:bg-justice-gold/90 transition-colors text-sm">
+                        View Details
+                    </button>
+                `;
+                
+                container.appendChild(caseCard);
+            });
+        }
+
+        // Initialize page on load
+        window.onload = function() {
+            console.log('Window loaded, initializing...');
+            showPage('page-dashboard');
+            
+            // Verify button elements exist
+            console.log('=== Button Verification ===');
+            console.log('mic-button:', document.getElementById('mic-button'));
+            console.log('pulse-ring:', document.getElementById('pulse-ring'));
+            console.log('waveform-ring:', document.getElementById('waveform-ring'));
+            console.log('mic-status:', document.getElementById('mic-status'));
+            console.log('loading:', document.getElementById('loading'));
+        };
+        
+        // Log script loaded
+        console.log('=== Script loaded successfully ===');
+        console.log('API_ENDPOINT:', API_ENDPOINT);
+        console.log('isRecording:', isRecording);
+    </script>
+
+        <script>
+        const UI_TRANSLATIONS = {
+            en: {
+                dashboard: "Dashboard", voiceTriage: "Voice Triage", verifyDoc: "Verify Document",
+                caseHistory: "Case History", legalLibrary: "Legal Library", justiceGuardian: "Justice Guardian",
+                welcome: "Welcome to Nyaya-Dwarpal", tagline: "Justice in Your Language",
+                totalCases: "Total Cases Filed", docsTranslated: "Documents Translated",
+                langSupported: "Languages Supported", quickActions: "Quick Actions",
+                voiceTriageDesc: "Describe your legal issue in your own words",
+                docUpload: "Document Upload", docUploadDesc: "Translate legal documents to your language",
+                caseHistoryDesc: "View your previous voice triage searches",
+                pageTitle: "Voice Triage", startRecording: "Start Recording", stopRecording: "Stop Recording",
+                typeIssue: "Type Your Issue", submit: "Submit", clear: "Clear", analyzing: "Analyzing..."
+            },
+            hi: {
+                dashboard: "डैशबोर्ड", voiceTriage: "वॉइस ट्राइज", verifyDoc: "दस्तावेज़ जांचें",
+                caseHistory: "केस इतिहास", legalLibrary: "कानूनी पुस्तकालय", justiceGuardian: "न्याय रक्षक",
+                welcome: "न्याय-द्वारपाल में आपका स्वागत है", tagline: "आपकी भाषा में न्याय",
+                totalCases: "कुल दर्ज मामले", docsTranslated: "अनुवादित दस्तावेज़",
+                langSupported: "समर्थित भाषाएं", quickActions: "त्वरित कार्य",
+                voiceTriageDesc: "अपनी कानूनी समस्या अपने शब्दों में बताएं",
+                docUpload: "दस्तावेज़ अपलोड", docUploadDesc: "कानूनी दस्तावेज़ अपनी भाषा में अनुवाद करें",
+                caseHistoryDesc: "अपनी पिछली वॉइस ट्राइज खोजें देखें",
+                pageTitle: "वॉइस ट्राइज", startRecording: "रिकॉर्डिंग शुरू करें", stopRecording: "रिकॉर्डिंग रोकें",
+                typeIssue: "अपनी समस्या लिखें", submit: "जमा करें", clear: "साफ़ करें", analyzing: "विश्लेषण हो रहा है..."
+            },
+            te: {
+                dashboard: "డాష్బోర్డ్", voiceTriage: "వాయిస్ ట్రయాజ్", verifyDoc: "పత్రం తనిఖీ",
+                caseHistory: "కేసు చరిత్ర", legalLibrary: "చట్ట గ్రంథాలయం", justiceGuardian: "న్యాయ రక్షకుడు",
+                welcome: "న్యాయ-ద్వారపాల్‌కు స్వాగతం", tagline: "మీ భాషలో న్యాయం",
+                totalCases: "మొత్తం కేసులు", docsTranslated: "అనువదించిన పత్రాలు",
+                langSupported: "మద్దతు భాషలు", quickActions: "త్వరిత చర్యలు",
+                voiceTriageDesc: "మీ చట్ట సమస్యను మీ మాటల్లో చెప్పండి",
+                docUpload: "పత్రం అప్లోడ్", docUploadDesc: "చట్ట పత్రాలను మీ భాషలోకి అనువదించండి",
+                caseHistoryDesc: "మీ మునుపటి వాయిస్ ట్రయాజ్ శోధనలు చూడండి",
+                pageTitle: "వాయిస్ ట్రయాజ్", startRecording: "రికార్డింగ్ ప్రారంభించండి", stopRecording: "రికార్డింగ్ ఆపండి",
+                typeIssue: "సమస్య రాయండి", submit: "సమర్పించు", clear: "క్లియర్", analyzing: "విశ్లేషిస్తోంది..."
+            },
+            ta: {
+                dashboard: "டாஷ்போர்டு", voiceTriage: "வாய்ஸ் ட்ரையாஜ்", verifyDoc: "ஆவணம் சரிபார்",
+                caseHistory: "வழக்கு வரலாறு", legalLibrary: "சட்ட நூலகம்", justiceGuardian: "நீதி காவலர்",
+                welcome: "நியாய-த்வார்பால்-க்கு வரவேற்கிறோம்", tagline: "உங்கள் மொழியில் நீதி",
+                totalCases: "மொத்த வழக்குகள்", docsTranslated: "மொழிபெயர்க்கப்பட்ட ஆவணங்கள்",
+                langSupported: "ஆதரிக்கப்படும் மொழிகள்", quickActions: "விரைவு செயல்கள்",
+                voiceTriageDesc: "உங்கள் சட்ட பிரச்சனையை உங்கள் வார்த்தைகளில் விவரிக்கவும்",
+                docUpload: "ஆவணம் பதிவேற்றம்", docUploadDesc: "சட்ட ஆவணங்களை உங்கள் மொழியில் மொழிபெயர்க்கவும்",
+                caseHistoryDesc: "உங்கள் முந்தைய வாய்ஸ் ட்ரையாஜ் தேடல்களைப் பார்க்கவும்",
+                pageTitle: "வாய்ஸ் ட்ரையாஜ்", startRecording: "பதிவு தொடங்கு", stopRecording: "பதிவு நிறுத்து",
+                typeIssue: "பிரச்சனை எழுதுங்கள்", submit: "சமர்ப்பி", clear: "அழி", analyzing: "பகுப்பாய்வு..."
+            },
+            bn: {
+                dashboard: "ড্যাশবোর্ড", voiceTriage: "ভয়েস ট্রাইয়াজ", verifyDoc: "নথি যাচাই",
+                caseHistory: "মামলার ইতিহাস", legalLibrary: "আইন গ্রন্থাগার", justiceGuardian: "ন্যায় রক্ষক",
+                welcome: "ন্যায়-দ্বারপালে স্বাগতম", tagline: "আপনার ভাষায় ন্যায়বিচার",
+                totalCases: "মোট মামলা", docsTranslated: "অনুবাদিত নথি",
+                langSupported: "সমর্থিত ভাষা", quickActions: "দ্রুত কার্যক্রম",
+                voiceTriageDesc: "আপনার আইনি সমস্যা আপনার ভাষায় বলুন",
+                docUpload: "নথি আপলোড", docUploadDesc: "আইনি নথি আপনার ভাষায় অনুবাদ করুন",
+                caseHistoryDesc: "আপনার আগের ভয়েস ট্রাইয়াজ অনুসন্ধান দেখুন",
+                pageTitle: "ভয়েস ট্রাইয়াজ", startRecording: "রেকর্ডিং শুরু করুন", stopRecording: "রেকর্ডিং বন্ধ করুন",
+                typeIssue: "সমস্যা লিখুন", submit: "জমা দিন", clear: "পরিষ্কার", analyzing: "বিশ্লেষণ হচ্ছে..."
+            },
+            mr: {
+                dashboard: "डॅशबोर्ड", voiceTriage: "व्हॉइस ट्रायज", verifyDoc: "दस्तऐवज तपासा",
+                caseHistory: "केस इतिहास", legalLibrary: "कायदा ग्रंथालय", justiceGuardian: "न्याय रक्षक",
+                welcome: "न्याय-द्वारपालमध्ये आपले स्वागत आहे", tagline: "तुमच्या भाषेत न्याय",
+                totalCases: "एकूण दाखल केस", docsTranslated: "अनुवादित कागदपत्रे",
+                langSupported: "समर्थित भाषा", quickActions: "जलद क्रिया",
+                voiceTriageDesc: "तुमची कायदेशीर समस्या तुमच्या शब्दांत सांगा",
+                docUpload: "कागदपत्र अपलोड", docUploadDesc: "कायदेशीर कागदपत्रे तुमच्या भाषेत अनुवाद करा",
+                caseHistoryDesc: "तुमच्या मागील व्हॉइस ट्रायज शोध पहा",
+                pageTitle: "व्हॉइस ट्रायज", startRecording: "रेकॉर्डिंग सुरू करा", stopRecording: "रेकॉर्डिंग थांबवा",
+                typeIssue: "समस्या लिहा", submit: "सादर करा", clear: "साफ करा", analyzing: "विश्लेषण होत आहे..."
+            }
+        };
+        function changeUILanguage(lang) {
+            const t = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.en;
+            localStorage.setItem('ui-language', lang);
+            // Nav labels
+            const navLabels = document.querySelectorAll('.nav-label');
+            const keys = ['dashboard','voiceTriage','verifyDoc','caseHistory','legalLibrary'];
+            navLabels.forEach((el, i) => { if(keys[i]) el.textContent = t[keys[i]]; });
+            // Subtitle
+            const subtitle = document.querySelector('.justice-guardian-subtitle');
+            if(subtitle) subtitle.textContent = t.justiceGuardian;
+            // Dashboard content
+            const el = (id) => document.getElementById(id);
+            if(el('dash-welcome')) el('dash-welcome').textContent = t.welcome;
+            if(el('dash-tagline')) el('dash-tagline').textContent = t.tagline;
+            if(el('dash-total-cases')) el('dash-total-cases').textContent = t.totalCases;
+            if(el('dash-docs-translated')) el('dash-docs-translated').textContent = t.docsTranslated;
+            if(el('dash-lang-supported')) el('dash-lang-supported').textContent = t.langSupported;
+            if(el('dash-quick-actions')) el('dash-quick-actions').textContent = t.quickActions;
+            if(el('dash-vt-title')) el('dash-vt-title').textContent = t.voiceTriage;
+            if(el('dash-vt-desc')) el('dash-vt-desc').textContent = t.voiceTriageDesc;
+            if(el('dash-doc-title')) el('dash-doc-title').textContent = t.docUpload;
+            if(el('dash-doc-desc')) el('dash-doc-desc').textContent = t.docUploadDesc;
+            if(el('dash-ch-title')) el('dash-ch-title').textContent = t.caseHistory;
+            if(el('dash-ch-desc')) el('dash-ch-desc').textContent = t.caseHistoryDesc;
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('ui-language') || 'en';
+            const sel = document.getElementById('ui-language');
+            if(sel) { sel.value = saved; changeUILanguage(saved); }
+        });
+        </script>
+</body>
+</html>
