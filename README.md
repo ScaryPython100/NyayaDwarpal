@@ -104,6 +104,7 @@ pip install -r lambda_functions/audio_transcribe/requirements.txt -t lambda_func
   --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.11
 pip install -r lambda_functions/document_verifier/requirements.txt -t lambda_functions/document_verifier \
   --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.11
+pip install PyPDF2 -t lambda_functions/document_translator --no-deps
 ```
 
 ### 3. Set your keys
